@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: 463d6cb3c1b27ea4d945eb91f7b547ae
+  productGUID: 7cc8e36b6830f294387c001605df510b
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: BreakoutExpress
+  productName: 3D to 2D Camera demo
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -837,14 +837,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: BreakoutExpress
+  metroPackageName: 3D to 2D Camera demo
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: BreakoutExpress
+  metroApplicationDescription: 3D to 2D Camera demo
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -915,11 +915,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: f711d640-3c6e-421f-b75b-ab4a6f8af648
+  cloudProjectId: 7f5f69ba-26ae-4ea4-8244-928d1d695aed
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: BreakoutExpress
-  organizationId: miokag
+  projectName: 3D to 2D Camera demo
+  organizationId: unity_54b962e845e374c240de
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
