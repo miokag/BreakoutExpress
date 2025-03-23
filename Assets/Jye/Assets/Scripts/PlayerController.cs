@@ -2,19 +2,35 @@ using UnityEngine;
 
 public class CustomPlayerController : MonoBehaviour
 {
-    public float moveSpeed = 6f;
+    public float walkSpeed = 6f;
+    public float runSpeed = 10f;
+    public float crouchSpeed = 3f;
     public float jumpForce = 8f;
     public float gravity = 20f;
-    public float groundCheckDistance = 0.1f;
+    public float groundCheckDistance = 0.2f; // Slightly increased for better detection
+    public float crouchHeight = 1f; // Height of the player when crouching
     public Transform cameraTransform; // Reference to the Cinemachine FreeLook camera's transform
 
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
+    private bool isCrouching;
+    private bool isRunning;
+    private float originalHeight; // Original height of the player
+    private Vector3 originalCenter; // Original center of the player
+
+    // Input variables
+    private float horizontal;
+    private float vertical;
+    private bool jumpInput;
+    private bool crouchInput;
+    private bool runInput;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        originalHeight = controller.height;
+        originalCenter = controller.center; // Store the original center
 
         // If no camera transform is assigned, use the main camera
         if (cameraTransform == null)
@@ -25,17 +41,40 @@ public class CustomPlayerController : MonoBehaviour
 
     void Update()
     {
+        // Gather all inputs
+        GatherInputs();
+
         // Check if the player is grounded
         isGrounded = CheckGrounded();
 
         // Handle movement
         HandleMovement();
 
-        // Handle jumping
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        // Handle jumping (only allow jumping if not crouching and grounded)
+        if (jumpInput && isGrounded && !isCrouching)
         {
             velocity.y = jumpForce;
+            Debug.Log("Jumping!");
         }
+
+        // Handle crouching
+        if (crouchInput)
+        {
+            if (!isCrouching)
+            {
+                StartCrouch();
+            }
+        }
+        else
+        {
+            if (isCrouching)
+            {
+                StopCrouch();
+            }
+        }
+
+        // Handle running (prevent running while crouching)
+        isRunning = runInput && !isCrouching;
 
         // Apply gravity
         if (!isGrounded)
@@ -47,11 +86,20 @@ public class CustomPlayerController : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
+    private void GatherInputs()
+    {
+        // Movement inputs
+        horizontal = Input.GetAxis("Horizontal");
+        vertical = Input.GetAxis("Vertical");
+
+        // Action inputs
+        jumpInput = Input.GetButtonDown("Jump");
+        crouchInput = Input.GetKey(KeyCode.LeftControl); // Hold Ctrl to crouch
+        runInput = Input.GetKey(KeyCode.LeftShift);
+    }
+
     private void HandleMovement()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
         // Get the camera's forward and right vectors, ignoring vertical rotation
         Vector3 cameraForward = cameraTransform.forward;
         Vector3 cameraRight = cameraTransform.right;
@@ -63,9 +111,12 @@ public class CustomPlayerController : MonoBehaviour
         // Calculate movement direction relative to the camera
         Vector3 moveDirection = (cameraForward * vertical + cameraRight * horizontal).normalized;
 
+        // Adjust speed based on crouching or running
+        float currentSpeed = isCrouching ? crouchSpeed : (isRunning ? runSpeed : walkSpeed);
+
         // Update velocity based on movement direction
-        velocity.x = moveDirection.x * moveSpeed;
-        velocity.z = moveDirection.z * moveSpeed;
+        velocity.x = moveDirection.x * currentSpeed;
+        velocity.z = moveDirection.z * currentSpeed;
 
         // Rotate the player to face the movement direction
         if (moveDirection != Vector3.zero)
@@ -75,14 +126,29 @@ public class CustomPlayerController : MonoBehaviour
         }
     }
 
+    private void StartCrouch()
+    {
+        isCrouching = true;
+        controller.height = crouchHeight;
+        controller.center = new Vector3(0, crouchHeight / 2, 0); // Adjust the center to avoid sinking into the ground
+    }
+
+    private void StopCrouch()
+    {
+        isCrouching = false;
+        controller.height = originalHeight;
+        controller.center = originalCenter; // Reset to the original center
+    }
+
     private bool CheckGrounded()
     {
-        // Raycast to check if the player is grounded
+        // Adjust the raycast starting position to be at the bottom of the player's collider
+        Vector3 raycastStart = transform.position + controller.center - Vector3.up * (controller.height / 2);
+
+        // Perform the raycast
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, groundCheckDistance))
-        {
-            return true;
-        }
-        return false;
+        bool isGrounded = Physics.Raycast(raycastStart, Vector3.down, out hit, groundCheckDistance);
+        
+        return isGrounded;
     }
 }
