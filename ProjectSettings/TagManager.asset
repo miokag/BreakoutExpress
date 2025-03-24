@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - 2DCamera
+  - Climb
   layers:
   - Default
   - TransparentFX
