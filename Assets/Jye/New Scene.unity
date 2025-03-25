@@ -300,15 +300,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 593990249}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa4963b5c9584a8889ee839125234e21, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c255731fd784ac2bec7261ef2a6866c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 5
-  MoveDistance: 5
-  SlowDuration: 3
-  SlowAmount: 0.5
-  PushForce: 10
-  PushDuration: 3
+  PushForce: 100
+  PushDuration: 1
 --- !u!1 &652059686
 GameObject:
   m_ObjectHideFlags: 0
