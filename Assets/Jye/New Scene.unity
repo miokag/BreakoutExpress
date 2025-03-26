@@ -215,7 +215,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -303,8 +303,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c255731fd784ac2bec7261ef2a6866c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PushForce: 100
-  PushDuration: 1
+  pushForce: 300
+  screamRange: 5
+  windupTime: 1
+  screamDuration: 0.5
+  cooldownTime: 3
+  screamParticles: {fileID: 0}
+  screamSound: {fileID: 0}
+  playerController: {fileID: 0}
 --- !u!1 &652059686
 GameObject:
   m_ObjectHideFlags: 0
@@ -1330,6 +1336,8 @@ MonoBehaviour:
   gravity: 20
   groundCheckDistance: 0.1
   crouchHeight: 1
+  movementSmoothing: 10
+  groundFriction: 0.9
   cameraTransform: {fileID: 1255731391}
 --- !u!143 &1891574830
 CharacterController:
