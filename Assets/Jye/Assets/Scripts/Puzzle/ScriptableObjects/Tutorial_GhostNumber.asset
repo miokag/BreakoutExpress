@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Tutorial_GhostNumber
   m_EditorClassIdentifier: 
   question: How many ghosts are in the train cart?
-  correctAnswer: 1
-  hint: Just count!
+  correctAnswer: 2

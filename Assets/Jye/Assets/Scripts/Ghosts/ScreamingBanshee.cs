@@ -37,20 +37,14 @@ public class ScreamingBanshee : MonoBehaviour
         Vector3 direction = player.position - transform.position;
         direction.y = 0;
         
-        if (direction.sqrMagnitude > 0.1f) 
-        {
-            direction.Normalize();
-        }
-        else
-        {
-            direction = player.forward;
-        }
+        if (direction.sqrMagnitude > 0.1f) { direction.Normalize(); }
+        else { direction = player.forward; }
         
         bool wasPushed = false;
         
         if (player.TryGetComponent<CharacterController>(out var cc))
         {
-             cc.Move(direction * pushForce * Time.deltaTime);
+            cc.Move(direction * pushForce * Time.deltaTime);
             wasPushed = true;
         }
         

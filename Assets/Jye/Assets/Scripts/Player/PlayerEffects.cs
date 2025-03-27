@@ -20,21 +20,11 @@ namespace BreakoutExpress
         {
             switch (effect.type)
             {
-                case PlayerEffect.EffectType.PushBack:
-                    ApplyPushBack(effect);
-                    break;
                 case PlayerEffect.EffectType.Slow:
                     ApplySlow(effect);
                     break;
             }
-
             effectEndTime = Time.time + effect.duration;
-        }
-
-        private void ApplyPushBack(PlayerEffect effect)
-        {
-            // Apply an instant force
-            playerController.AddForce(effect.direction.normalized * effect.magnitude);
         }
 
         private void ApplySlow(PlayerEffect effect)
@@ -53,13 +43,8 @@ namespace BreakoutExpress
                     playerController.WalkSpeed = originalWalkSpeed;
                     playerController.RunSpeed = originalRunSpeed;
                     break;
-            
-                case PlayerEffect.EffectType.PushBack:
-                    // Push effects are instantaneous so nothing to cancel
-                    break;
             }
-    
-            // Optional: Reset the effect timer if you want
+            
             effectEndTime = Time.time;
         }
 

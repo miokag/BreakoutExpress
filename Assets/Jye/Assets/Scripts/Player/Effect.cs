@@ -7,13 +7,11 @@ namespace BreakoutExpress
     {
         public enum EffectType
         {
-            PushBack,
             Slow
         }
 
         public EffectType type;
         public float duration;
         public float magnitude;
-        public Vector3 direction;
     }
 }
