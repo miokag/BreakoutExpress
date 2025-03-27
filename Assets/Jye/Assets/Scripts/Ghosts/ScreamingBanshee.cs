@@ -1,92 +1,62 @@
+using BreakoutExpress;
 using UnityEngine;
-using System.Diagnostics;
 
-namespace BreakoutExpress
+public class ScreamingBanshee : MonoBehaviour
 {
-    public class ScreamingBanshee : MonoBehaviour
+    [Header("Settings")]
+    [SerializeField] private float pushForce = 10f;
+    [SerializeField] private float cooldown = 1f;
+    [SerializeField] private string playerTag = "Player";
+    
+    private Collider triggerZone;
+    private float nextPushTime;
+    
+    private void Awake()
     {
-        [Header("Settings")]
-        [SerializeField] private float pushForce = 15f;
-        [SerializeField] private float screamRange = 5f;
-        [SerializeField] private float windupTime = 1f;
-        [SerializeField] private float screamDuration = 0.5f;
-        [SerializeField] private float cooldownTime = 3f;
+        triggerZone = GetComponentInChildren<Collider>();
+        if (triggerZone == null)
+        {
+            Debug.LogError("Missing trigger collider on child object!", this);
+            enabled = false;
+            return;
+        }
+        triggerZone.isTrigger = true;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (!other.CompareTag(playerTag)) return;
+        if (Time.time < nextPushTime) return;
         
-        [Header("References")]
-        [SerializeField] private ParticleSystem screamParticles;
-        [SerializeField] private AudioSource screamSound;
-        [SerializeField] private PlayerController playerController; 
+        PushPlayer(other.transform);
+        nextPushTime = Time.time + cooldown;
+    }
 
-        private float timer;
-        private BansheeState state = BansheeState.Cooldown;
-
-        private enum BansheeState { Windup, Screaming, Cooldown }
-
-        void Start()
+    private void PushPlayer(Transform player)
+    {
+        Vector3 direction = player.position - transform.position;
+        direction.y = 0;
+        
+        if (direction.sqrMagnitude > 0.1f) 
         {
-            if (playerController == null)
-            {
-                playerController = FindObjectOfType<PlayerController>();
-            }
+            direction.Normalize();
         }
-
-        void Update()
+        else
         {
-            if (playerController == null) return;
-
-            timer -= Time.deltaTime;
-
-            switch (state)
-            {
-                case BansheeState.Cooldown when timer <= 0 && PlayerInRange():
-                    StartWindup();
-                    break;
-                
-                case BansheeState.Windup when timer <= 0:
-                    StartScreaming();
-                    break;
-                
-                case BansheeState.Screaming when timer <= 0:
-                    StartCooldown();
-                    break;
-            }
+            direction = player.forward;
         }
-
-        bool PlayerInRange()
+        
+        bool wasPushed = false;
+        
+        if (player.TryGetComponent<CharacterController>(out var cc))
         {
-            float distance = Vector3.Distance(transform.position, playerController.transform.position);
-            bool inRange = distance <= screamRange;
-            return inRange;
+             cc.Move(direction * pushForce * Time.deltaTime);
+            wasPushed = true;
         }
-
-        void StartWindup()
+        
+        if (!wasPushed)
         {
-            state = BansheeState.Windup;
-            timer = windupTime;
-        }
-
-        void StartScreaming()
-        {
-            state = BansheeState.Screaming;
-            timer = screamDuration;
-            
-            if (screamParticles != null) screamParticles.Play();
-            if (screamSound != null) screamSound.Play();
-            
-            Vector3 pushDirection = (playerController.transform.position - transform.position).normalized;
-            playerController.ApplyEffect(new PushbackEffect(screamDuration, pushDirection, pushForce));
-        }
-
-        void StartCooldown()
-        {
-            state = BansheeState.Cooldown;
-            timer = cooldownTime;
-        }
-
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, screamRange);
+            Debug.LogWarning("No compatible physics component found!", player);
         }
     }
 }

@@ -22,6 +22,14 @@ namespace BreakoutExpress
         
         [Header("References")]
         [SerializeField] private Transform cameraTransform;
+        [SerializeField] private PlayerEffects playerEffects;
+        
+        [Header("State Flags")]
+        [SerializeField] private bool canRun = true;
+        public bool CanRun {
+            get => canRun;
+            set => canRun = value;
+        }
 
         private CharacterController controller;
         private Vector3 velocity;
@@ -32,16 +40,16 @@ namespace BreakoutExpress
         private Vector3 originalCenter;
 
         private PlayerInput input;
-        private List<Effect> activeEffects = new List<Effect>();
 
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
             originalHeight = controller.height;
             originalCenter = controller.center;
-            
+    
             input = new PlayerInput();
-            
+            playerEffects = GetComponent<PlayerEffects>();
+    
             if (cameraTransform == null)
             {
                 cameraTransform = Camera.main?.transform;
@@ -63,21 +71,8 @@ namespace BreakoutExpress
             HandleGravity();
             
             controller.Move(velocity * Time.deltaTime);
-            HandleEffects();
         }
-
-        #region Public Methods
-        public void ApplyEffect(Effect effect)
-        {
-            effect.ApplyEffect(this);
-            activeEffects.Add(effect);
-        }
-
-        public void ApplyForce(Vector3 force)
-        {
-            controller.Move(force * Time.deltaTime);
-        }
-        #endregion
+        
 
         #region Input Handling
         private class PlayerInput
@@ -143,6 +138,11 @@ namespace BreakoutExpress
             velocity.x = moveDirection.x * speed;
             velocity.z = moveDirection.z * speed;
         }
+        
+        public void AddForce(Vector3 force)
+        {
+            velocity += force;
+        }
 
         private void ApplyGroundFriction()
         {
@@ -200,7 +200,7 @@ namespace BreakoutExpress
 
         private void HandleRunning()
         {
-            isRunning = input.Run && !isCrouching;
+            isRunning = input.Run && !isCrouching && canRun;
         }
 
         private void HandleGravity()
@@ -211,21 +211,7 @@ namespace BreakoutExpress
             }
         }
         #endregion
-
-        #region Effects
-        private void HandleEffects()
-        {
-            for (int i = activeEffects.Count - 1; i >= 0; i--)
-            {
-                Effect effect = activeEffects[i];
-                if (Time.time > effect.StartTime + effect.Duration)
-                {
-                    effect.RemoveEffect(this);
-                    activeEffects.RemoveAt(i);
-                }
-            }
-        }
-        #endregion
+        
 
         #region Ground Check
         private bool CheckGrounded()

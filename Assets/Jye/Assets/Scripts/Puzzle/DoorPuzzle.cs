@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using BreakoutExpress;
 
 public class DoorPuzzle : MonoBehaviour
 {
@@ -60,6 +61,9 @@ public class DoorPuzzle : MonoBehaviour
     {
         yield return new WaitForSeconds(doorOpenDelay);
         Debug.Log("Correct Answer");
+        this.enabled = false;
+        DoorInteractor doorInteractor = FindObjectOfType<DoorInteractor>();
+        doorInteractor.enabled = false;
         // GetComponent<Animator>().SetTrigger("Open");
         // GetComponent<Collider>().enabled = false;
         puzzleUI.SetActive(false);
