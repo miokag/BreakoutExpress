@@ -38,6 +38,10 @@ namespace BreakoutExpress
         private bool isRunning;
         private float originalHeight;
         private Vector3 originalCenter;
+        
+        private Transform currentPlatform;
+        private Vector3 lastPlatformPosition;
+        private Vector3 platformVelocity;
 
         private PlayerInput input;
 
@@ -63,6 +67,7 @@ namespace BreakoutExpress
             bool wasGrounded = isGrounded;
             isGrounded = CheckGrounded();
             
+            HandlePlatformMovement();
             HandleLanding(wasGrounded);
             HandleMovement();
             HandleJumping();
@@ -73,6 +78,48 @@ namespace BreakoutExpress
             controller.Move(velocity * Time.deltaTime);
         }
         
+        #region Platform Movement
+        private void HandlePlatformMovement()
+        {
+            if (isGrounded)
+            {
+                // Check for moving platform
+                RaycastHit hit;
+                Vector3 rayStart = transform.position + controller.center - Vector3.up * (controller.height / 2);
+                if (Physics.Raycast(rayStart, Vector3.down, out hit, groundCheckDistance + 0.1f))
+                {
+                    if (hit.transform != currentPlatform)
+                    {
+                        currentPlatform = hit.transform;
+                        lastPlatformPosition = hit.transform.position;
+                        return;
+                    }
+
+                    if (currentPlatform != null)
+                    {
+                        // Calculate platform movement velocity
+                        platformVelocity = currentPlatform.position - lastPlatformPosition;
+                        
+                        // Apply platform movement to player
+                        if (platformVelocity.magnitude > 0.001f)
+                        {
+                            controller.Move(platformVelocity);
+                        }
+                        
+                        lastPlatformPosition = currentPlatform.position;
+                    }
+                }
+                else
+                {
+                    currentPlatform = null;
+                }
+            }
+            else
+            {
+                currentPlatform = null;
+            }
+        }
+        #endregion
 
         #region Input Handling
         private class PlayerInput
