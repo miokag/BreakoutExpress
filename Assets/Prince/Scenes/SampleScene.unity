@@ -232,16 +232,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a179c3cd20fda3f4e8e70820b7b2076e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWave: 1
-  timeBetweenWaves: 3
-  maxWave: 5
   npcPrefab: {fileID: 5637702159064769434, guid: 9ee11a2a80ca98640b012b02c8e70c3a, type: 3}
-  spawnY: 1
-  spawnDelay: 0.5
-  spawnMargin: 2
-  detectionCountThreshold: 3
-  detectionCount: 0
-  isGameOver: 0
+  minSpawnDelay: 1
+  maxSpawnDelay: 3
+  spawnYPosition: 0
+  despawnMargin: 2
 --- !u!4 &888146311
 Transform:
   m_ObjectHideFlags: 0

@@ -130,6 +130,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 7
+  pauseDuration: 1
+  detectionRange: 6.3
+  pauseChance: 30
+  maxPauses: 3
+  minPauseInterval: 5
+  detectionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!61 &7671080317066260350
 BoxCollider2D:
   m_ObjectHideFlags: 0
