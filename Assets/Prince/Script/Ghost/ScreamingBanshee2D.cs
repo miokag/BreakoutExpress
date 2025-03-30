@@ -64,14 +64,12 @@ namespace BreakoutExpress2D
             if (Time.time < lastScreamTime + screamCooldown) return;
 
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-            Debug.Log("Distance to player: " + distanceToPlayer);
 
             if (distanceToPlayer > screamRange) return;
 
             bool playerInFront = (movingRight && player.position.x > transform.position.x) || 
                                (!movingRight && player.position.x < transform.position.x);
             
-            Debug.Log("Player in front: " + playerInFront);
             if (playerInFront)
             {
                 StartCoroutine(PerformScreamAttack());
@@ -83,7 +81,6 @@ namespace BreakoutExpress2D
             isScreaming = true;
             lastScreamTime = Time.time;
             rb.linearVelocity = Vector2.zero;
-            Debug.Log("SCREAM ATTACK STARTED!");
 
             // Effect
             if (screamEffectPrefab != null)
@@ -97,13 +94,11 @@ namespace BreakoutExpress2D
             Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
             if (playerRb == null)
             {
-                Debug.LogError("Player Rigidbody2D missing!");
                 yield break;
             }
 
             // Calculate direction - simpler and more reliable
             Vector2 pushDirection = movingRight ? Vector2.right : Vector2.left;
-            Debug.Log("Push direction: " + pushDirection + " | Force: " + pushbackForce);
 
             // Reset player velocity first for consistent knockback
             playerRb.linearVelocity = Vector2.zero;
@@ -113,9 +108,7 @@ namespace BreakoutExpress2D
     
             // Optional: Add slight upward force for arc effect
             playerRb.AddForce(Vector2.up * (pushbackForce * 0.3f), ForceMode2D.Impulse);
-
-            Debug.Log("Force applied! Player velocity: " + playerRb.linearVelocity);
-
+            
             yield return new WaitForSeconds(screamDuration);
             isScreaming = false;
         }
@@ -126,7 +119,6 @@ namespace BreakoutExpress2D
             Vector3 scale = transform.localScale;
             scale.x *= -1;
             transform.localScale = scale;
-            Debug.Log("Flipped! Now facing: " + (movingRight ? "right" : "left"));
         }
 
         private void OnDrawGizmosSelected()
