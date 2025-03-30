@@ -11,14 +11,11 @@ namespace BreakoutExpress
 
         [Header("Effect Settings")]
         [SerializeField] private float slowAmount = 0.3f;
-        [SerializeField] private float pushSlowAmount = 0.5f;
-        [SerializeField] private float effectDuration = 2f;
 
         [Header("Effects")]
         [SerializeField] private ParticleSystem slowZoneEffect;
 
         private Collider rangeTrigger;
-        private bool isPlayerInRange;
         private PlayerController affectedPlayer;
         private Vector3 startPosition;
         private float movementTimer;
@@ -59,7 +56,6 @@ namespace BreakoutExpress
                 PlayerController player = other.transform.root.GetComponent<PlayerController>();
                 if (player != null)
                 {
-                    isPlayerInRange = true;
                     affectedPlayer = player;
                     ApplyZoneEffect(true);
                     Debug.Log("Player entered slow zone");
@@ -71,7 +67,6 @@ namespace BreakoutExpress
         {
             if (other.transform.root.CompareTag("Player"))
             {
-                isPlayerInRange = false;
                 ApplyZoneEffect(false);
                 affectedPlayer = null;
                 Debug.Log("Player exited slow zone");
