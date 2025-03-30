@@ -22,7 +22,7 @@ namespace BreakoutExpress2D
         [SerializeField] private float groundRememberTime = 0.1f; 
         private float groundRememberCounter;
 
-        private Rigidbody2D rb;
+        internal Rigidbody2D rb;
         private bool facingRight = true;
         private bool isGrounded;
 
