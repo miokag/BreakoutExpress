@@ -13,9 +13,13 @@ public class NPCSpawner : MonoBehaviour
     
     [Header("Detection Scaling")]
     public int detectionCount = 0;
-    public float baseDetectionWidth = 3f;
-    public float maxDetectionWidth = 6f;
-    public float widthIncreasePerDetection = 0.5f;
+    public float baseDetectionWidth = 15f;
+    
+    [Header("Progressive Scaling")]
+    public int[] detectionThresholds = { 3, 6, 9 }; // Tier 0:0-2, Tier 1:3-5, Tier 2:6-8, Tier 3:9+
+    public float[] widthIncreasePerTier = { 0f, 0.5f, 1f, 1.5f };
+    public int[] maxPausesPerTier = { 3, 4, 5, 6 }; 
+    public int[] pauseChancePerTier = { 30, 45, 60, 75 }; 
 
     private Camera mainCamera;
     private float cameraHalfWidth;
@@ -55,22 +59,42 @@ public class NPCSpawner : MonoBehaviour
         NPCMovement mover = npc.GetComponent<NPCMovement>();
         if (mover != null)
         {
-            // Use the prefab's detectionWidth as base, then add scaling
-            float scaledWidth = Mathf.Min(
-                mover.detectionWidth + (detectionCount * widthIncreasePerDetection),
-                mover.detectionWidth * 2f // Or whatever maximum multiplier you want
-            );
+            int currentTier = GetCurrentTier();
+            int detectionsSinceLastThreshold = detectionCount - (currentTier > 0 ? detectionThresholds[currentTier-1] : 0);
+            
+            // Calculate width increase
+            float widthIncrease = widthIncreasePerTier[currentTier] * detectionsSinceLastThreshold;
+            float scaledWidth = baseDetectionWidth + widthIncrease;
+            
+            // Apply tier-based behavior
+            mover.maxPauses = maxPausesPerTier[currentTier];
+            mover.pauseChance = pauseChancePerTier[currentTier];
             mover.detectionWidth = scaledWidth;
+            
             mover.Initialize(Vector2.right, mainCamera);
         
-            Debug.Log($"Spawned NPC with detection width: {scaledWidth} " +
-                      $"(Base: {mover.detectionWidth}, Bonus: {detectionCount * widthIncreasePerDetection})");
+            Debug.Log($"Spawned NPC (Tier {currentTier}): " +
+                     $"Width={scaledWidth} (+{widthIncrease}), " +
+                     $"Pauses={mover.maxPauses}, " +
+                     $"Chance={mover.pauseChance}%");
         }
+    }
+
+    int GetCurrentTier()
+    {
+        for (int i = 0; i < detectionThresholds.Length; i++)
+        {
+            if (detectionCount < detectionThresholds[i])
+            {
+                return i;
+            }
+        }
+        return detectionThresholds.Length; 
     }
 
     public void IncreaseDetection()
     {
         detectionCount++;
-        Debug.Log($"Detection increased! Count: {detectionCount}");
+        Debug.Log($"Detection increased to {detectionCount} (Tier {GetCurrentTier()})");
     }
 }

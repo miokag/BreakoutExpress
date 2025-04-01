@@ -144,15 +144,12 @@ public class NPCMovement : MonoBehaviour
 
         Gizmos.color = detectionColor;
         
-        // Adjust position based on facing direction
         float directionMultiplier = direction.x > 0 ? 1 : -1;
         Vector2 adjustedOffset = new Vector2(detectionOffset.x * directionMultiplier, detectionOffset.y);
         Vector2 zoneCenter = (Vector2)transform.position + adjustedOffset;
 
-        // Draw rectangular detection zone
         Gizmos.DrawWireCube(zoneCenter, new Vector3(detectionWidth, detectionHeight, 0));
         
-        // Draw forward indicator
         Gizmos.color = Color.red;
         Vector3 forwardLineEnd = transform.position + (Vector3)(direction * 0.5f);
         Gizmos.DrawLine(transform.position, forwardLineEnd);
