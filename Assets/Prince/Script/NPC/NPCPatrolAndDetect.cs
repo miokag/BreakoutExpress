@@ -7,22 +7,29 @@ public class NPCMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float speed = 2f;
     public float pauseDuration = 1f;
-    public float detectionRange = 3f;
+
+    [Header("Detection Settings")]
+    public float detectionWidth = 15f;
+    public float detectionHeight = 2f;
+    public Vector2 detectionOffset = Vector2.zero;
 
     [Header("Behavior Settings")]
     [Range(0, 100)] public int pauseChance = 30;
     public int maxPauses = 3;
     public float minPauseInterval = 2f;
-    public float movementThreshold = 0.1f; // Minimum player movement to detect
+    public float movementThreshold = 0.1f;
+    public float detectionStartDelay = 0.2f;
 
     [Header("Gizmo Settings")]
     public Color detectionColor = Color.yellow;
+    public bool showGizmos = true;
 
     private Vector2 direction;
     private Camera mainCamera;
     private Transform player;
     private PlayerController2D playerController;
     private bool isPaused = false;
+    private bool isCheckingPlayer = false;
     private int pauseCount = 0;
     private float lastPauseTime;
     private float cameraHalfWidth;
@@ -45,7 +52,7 @@ public class NPCMovement : MonoBehaviour
 
     void Update()
     {
-        if (isPaused)
+        if (isPaused && isCheckingPlayer)
         {
             CheckPlayerMovementDuringPause();
             return;
@@ -62,10 +69,25 @@ public class NPCMovement : MonoBehaviour
 
     bool ShouldPause()
     {
-        return Vector2.Distance(transform.position, player.position) < detectionRange &&
-               pauseCount < maxPauses &&
-               Time.time - lastPauseTime > minPauseInterval &&
-               Random.Range(0, 100) < pauseChance;
+        if (pauseCount >= maxPauses) return false;
+        if (Time.time - lastPauseTime < minPauseInterval) return false;
+        if (Random.Range(0, 100) >= pauseChance) return false;
+
+        return IsPlayerInDetectionZone();
+    }
+
+    bool IsPlayerInDetectionZone()
+    {
+        Vector2 playerPos = player.position;
+        Vector2 zoneCenter = (Vector2)transform.position + detectionOffset;
+        
+        // Adjust zone direction based on NPC facing
+        float directionMultiplier = direction.x > 0 ? 1 : -1;
+        Vector2 adjustedOffset = new Vector2(detectionOffset.x * directionMultiplier, detectionOffset.y);
+        zoneCenter = (Vector2)transform.position + adjustedOffset;
+
+        return Mathf.Abs(playerPos.x - zoneCenter.x) < detectionWidth * 0.5f &&
+               Mathf.Abs(playerPos.y - zoneCenter.y) < detectionHeight * 0.5f;
     }
 
     void MoveAndDespawn()
@@ -84,14 +106,13 @@ public class NPCMovement : MonoBehaviour
 
     void CheckPlayerMovementDuringPause()
     {
-        // Check both position change and velocity
         bool playerMoved = Vector2.Distance(player.position, playerPositionAtPause) > movementThreshold ||
-                          Mathf.Abs(playerController.rb.linearVelocity.x) > movementThreshold;
+                           Mathf.Abs(playerController.rb.linearVelocity.x) > movementThreshold;
 
         if (playerMoved)
         {
-            Debug.Log($"NPC noticed player moving! (Position change: {Vector2.Distance(player.position, playerPositionAtPause):F2}, " +
-                     $"Velocity: {playerController.rb.linearVelocity.x:F2})");
+            Debug.Log($"NPC noticed player moving after stopping!");
+            NPCSpawner.Instance.IncreaseDetection();
         }
     }
 
@@ -100,21 +121,40 @@ public class NPCMovement : MonoBehaviour
         isPaused = true;
         pauseCount++;
         lastPauseTime = Time.time;
-        playerPositionAtPause = player.position;
         float originalSpeed = speed;
         speed = 0f;
 
-        Debug.Log($"NPC paused ({pauseCount}/{maxPauses}) at player position: {playerPositionAtPause}");
+        Debug.Log($"NPC paused ({pauseCount}/{maxPauses})");
 
-        yield return new WaitForSeconds(pauseDuration);
+        yield return new WaitForSeconds(detectionStartDelay);
+        
+        playerPositionAtPause = player.position;
+        isCheckingPlayer = true;
+
+        yield return new WaitForSeconds(pauseDuration - detectionStartDelay);
 
         speed = originalSpeed;
         isPaused = false;
+        isCheckingPlayer = false;
     }
 
     void OnDrawGizmosSelected()
     {
+        if (!showGizmos) return;
+
         Gizmos.color = detectionColor;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        
+        // Adjust position based on facing direction
+        float directionMultiplier = direction.x > 0 ? 1 : -1;
+        Vector2 adjustedOffset = new Vector2(detectionOffset.x * directionMultiplier, detectionOffset.y);
+        Vector2 zoneCenter = (Vector2)transform.position + adjustedOffset;
+
+        // Draw rectangular detection zone
+        Gizmos.DrawWireCube(zoneCenter, new Vector3(detectionWidth, detectionHeight, 0));
+        
+        // Draw forward indicator
+        Gizmos.color = Color.red;
+        Vector3 forwardLineEnd = transform.position + (Vector3)(direction * 0.5f);
+        Gizmos.DrawLine(transform.position, forwardLineEnd);
     }
 }
