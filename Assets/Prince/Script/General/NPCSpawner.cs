@@ -23,29 +23,59 @@ public class NPCSpawner : MonoBehaviour
 
     private Camera mainCamera;
     private float cameraHalfWidth;
+    private Coroutine spawnCoroutine;
+    private bool isSpawning;
 
     void Awake()
     {
         Instance = this;
     }
 
-    void Start()
+    void OnEnable()
     {
         mainCamera = Camera.main;
         cameraHalfWidth = mainCamera.orthographicSize * mainCamera.aspect;
-        StartCoroutine(SpawnRoutine());
+        isSpawning = false; // Reset spawning state when enabled
+        spawnCoroutine = StartCoroutine(SpawnRoutine());
+    }
+    
+    void OnDisable()
+    {
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+        }
+        isSpawning = false;
+    
+        // Clean up any existing NPCs when disabled
+        var npcs = GameObject.FindGameObjectsWithTag("NPC");
+        foreach (var npc in npcs)
+        {
+            Destroy(npc);
+        }
     }
 
-    IEnumerator SpawnRoutine()
+
+    public IEnumerator SpawnRoutine()
     {
         while (true)
         {
-            yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("NPC").Length == 0);
+            // Wait until all NPCs are gone and we're not already spawning
+            yield return new WaitUntil(() => 
+                GameObject.FindGameObjectsWithTag("NPC").Length == 0 && !isSpawning);
+            
+            isSpawning = true; // Mark that we're starting a spawn cycle
             
             float spawnDelay = Random.Range(minSpawnDelay, maxSpawnDelay);
             yield return new WaitForSeconds(spawnDelay);
             
-            SpawnNPC();
+            if (this.isActiveAndEnabled)
+            {
+                SpawnNPC();
+            }
+            
+            isSpawning = false;
         }
     }
 
@@ -72,11 +102,6 @@ public class NPCSpawner : MonoBehaviour
             mover.detectionWidth = scaledWidth;
             
             mover.Initialize(Vector2.right, mainCamera);
-        
-            Debug.Log($"Spawned NPC (Tier {currentTier}): " +
-                     $"Width={scaledWidth} (+{widthIncrease}), " +
-                     $"Pauses={mover.maxPauses}, " +
-                     $"Chance={mover.pauseChance}%");
         }
     }
 

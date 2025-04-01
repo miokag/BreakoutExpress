@@ -2,66 +2,83 @@ using UnityEngine;
 
 public class DoorInteractor : MonoBehaviour
 {
-    [Header("Settings")]
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private MeshCollider interactionRange;
-    
-    private DoorPuzzle nearbyDoor;
-    private bool isInRange;
+    [Header("Interaction Settings")]
+    public KeyCode interactKey = KeyCode.E;
+    public Vector3 interactSize = new Vector3(2f, 2f, 2f); // Dimensions of interaction cube
+    public Vector3 interactOffset = new Vector3(0f, 0f, 1f); // Offset from player position
 
-    private void Start()
-    {
-        if (interactionRange == null) 
-        {
-            interactionRange = GetComponentInChildren<MeshCollider>();
-            if (interactionRange == null) return;
-        }
+    [Header("Visualization")]
+    public Color gizmoColor = new Color(0, 1, 1, 0.5f);
+    public bool showGizmo = true;
 
-        if (!interactionRange.convex) interactionRange.convex = true;
-        if (!interactionRange.isTrigger) interactionRange.isTrigger = true;
-    }
+    private DoorPuzzle currentNearbyDoor;
+    private Vector3 detectionCenter;
 
     void Update()
     {
-        if (isInRange && Input.GetKeyDown(interactKey))
+        detectionCenter = transform.position + interactOffset;
+        CheckForDoors();
+        
+        if (currentNearbyDoor != null && Input.GetKeyDown(interactKey))
         {
-            nearbyDoor?.StartPuzzle();
+            currentNearbyDoor.StartPuzzle();
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    void CheckForDoors()
     {
-        if (!other.CompareTag("Interactable")) return;
+        // Find all potential doors in scene
+        DoorPuzzle[] allDoors = FindObjectsOfType<DoorPuzzle>();
+        DoorPuzzle closestValidDoor = null;
+        float closestDistance = float.MaxValue;
 
-        if (other.TryGetComponent<DoorPuzzle>(out var door))
+        foreach (DoorPuzzle door in allDoors)
         {
-            nearbyDoor = door;
-            isInRange = true;
-            door.ShowInteractPrompt(true);
+            if (!door.CompareTag("Interactable")) continue;
+
+            Vector3 doorPos = door.transform.position;
+            float distance = Vector3.Distance(doorPos, detectionCenter);
+
+            // Check if door is within the 3D interaction cube
+            if (IsInInteractionCube(doorPos) && distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestValidDoor = door;
+            }
+        }
+
+        // Handle door proximity changes
+        if (closestValidDoor != currentNearbyDoor)
+        {
+            // Hide prompt from previous door
+            if (currentNearbyDoor != null)
+            {
+                currentNearbyDoor.ShowInteractPrompt(false);
+            }
+
+            // Show prompt on new door
+            if (closestValidDoor != null)
+            {
+                closestValidDoor.ShowInteractPrompt(true);
+            }
+
+            currentNearbyDoor = closestValidDoor;
         }
     }
 
-    void OnTriggerExit(Collider other)
+    bool IsInInteractionCube(Vector3 position)
     {
-        if (!other.CompareTag("Interactable")) return;
-
-        if (nearbyDoor != null && other.gameObject == nearbyDoor.gameObject)
-        {
-            nearbyDoor.ShowInteractPrompt(false);
-            nearbyDoor = null;
-            isInRange = false;
-        }
+        Vector3 relativePos = position - detectionCenter;
+        return Mathf.Abs(relativePos.x) < interactSize.x * 0.5f &&
+               Mathf.Abs(relativePos.y) < interactSize.y * 0.5f &&
+               Mathf.Abs(relativePos.z) < interactSize.z * 0.5f;
     }
 
     void OnDrawGizmosSelected()
     {
-        if (interactionRange != null)
-        {
-            Gizmos.color = new Color(0, 1, 1, 0.25f);
-            Gizmos.DrawMesh(interactionRange.sharedMesh, 
-                interactionRange.transform.position,
-                interactionRange.transform.rotation,
-                interactionRange.transform.lossyScale);
-        }
+        if (!showGizmo) return;
+
+        Gizmos.color = gizmoColor;
+        Gizmos.DrawWireCube(detectionCenter, interactSize);
     }
 }

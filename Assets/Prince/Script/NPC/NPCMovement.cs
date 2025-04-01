@@ -124,7 +124,7 @@ public class NPCMovement : MonoBehaviour
         float originalSpeed = speed;
         speed = 0f;
 
-        Debug.Log($"NPC paused ({pauseCount}/{maxPauses})");
+        //Debug.Log($"NPC paused ({pauseCount}/{maxPauses})");
 
         yield return new WaitForSeconds(detectionStartDelay);
         
