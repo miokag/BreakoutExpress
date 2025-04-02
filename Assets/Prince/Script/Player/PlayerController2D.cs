@@ -75,7 +75,6 @@ namespace BreakoutExpress2D
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 groundRememberCounter = 0;
-                animator.SetTrigger("JumpTakeOff");
             }
 
             // Variable jump height
@@ -98,7 +97,6 @@ namespace BreakoutExpress2D
             else if (wasGrounded != isGrounded) // Just landed
             {
                 animator.SetBool("isJumping", false);
-                animator.SetTrigger("Land");
             }
         }
 

@@ -1,29 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EyeFollow : MonoBehaviour
 {   
-    public GameObject player;
+    private Transform player;
 
-    void Start()
+    void OnEnable()
     {
-        player = GameObject.Find("Player");
+        // Find player only when enabled
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
+        else
+        {
+            enabled = false;
+        }
     }
-
 
     void Update()
     {
-        eyeFollow();
+        if (player != null)
+        {
+            EyeFollowPlayer();
+        }
     }
 
-    void eyeFollow(){
-        Vector3 playerpos = player.transform.position;
-
+    void EyeFollowPlayer()
+    {
+        Vector3 playerPos = player.position;
         Vector2 direction = new Vector2(
-            (playerpos.x - transform.position.x),
-            (playerpos.y - transform.position.y)     
+            (playerPos.x - transform.position.x),
+            (playerPos.y - transform.position.y)     
         );
-        transform.up = direction;
+        
+        // Only update rotation if direction is significant
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            transform.up = direction;
+        }
     }
 }

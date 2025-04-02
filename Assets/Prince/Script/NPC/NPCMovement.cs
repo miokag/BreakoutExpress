@@ -9,7 +9,7 @@ public class NPCMovement : MonoBehaviour
     public float pauseDuration = 1f;
 
     [Header("Detection Settings")]
-    public float detectionWidth = 15f;
+    public float detectionWidth = 30f;
     public float detectionHeight = 2f;
     public Vector2 detectionOffset = Vector2.zero;
 
@@ -26,14 +26,21 @@ public class NPCMovement : MonoBehaviour
 
     private Vector2 direction;
     private Camera mainCamera;
+    
     private Transform player;
     private PlayerController2D playerController;
+    
     private bool isPaused = false;
     private bool isCheckingPlayer = false;
     private int pauseCount = 0;
     private float lastPauseTime;
+    
     private float cameraHalfWidth;
     private Vector2 playerPositionAtPause;
+    
+    private EyeFollow eyeFollow;
+    private bool playerDetectedDuringPause = false;
+
 
     void Start()
     {
@@ -41,7 +48,14 @@ public class NPCMovement : MonoBehaviour
         cameraHalfWidth = mainCamera.orthographicSize * mainCamera.aspect;
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerController = player.GetComponent<PlayerController2D>();
+        
+        eyeFollow = GetComponentInChildren<EyeFollow>(true);
+        if (eyeFollow != null)
+        {
+            eyeFollow.enabled = false;
+        }
     }
+
 
     public void Initialize(Vector2 moveDirection, Camera cam)
     {
@@ -111,20 +125,26 @@ public class NPCMovement : MonoBehaviour
 
         if (playerMoved)
         {
+            playerDetectedDuringPause = true;
             Debug.Log($"NPC noticed player moving after stopping!");
             NPCSpawner.Instance.IncreaseDetection();
+            
+            // Enable eye follow when player is detected
+            if (eyeFollow != null)
+            {
+                eyeFollow.enabled = true;
+            }
         }
     }
 
     IEnumerator PauseMovement()
     {
         isPaused = true;
+        playerDetectedDuringPause = false;
         pauseCount++;
         lastPauseTime = Time.time;
         float originalSpeed = speed;
         speed = 0f;
-
-        //Debug.Log($"NPC paused ({pauseCount}/{maxPauses})");
 
         yield return new WaitForSeconds(detectionStartDelay);
         
@@ -136,6 +156,12 @@ public class NPCMovement : MonoBehaviour
         speed = originalSpeed;
         isPaused = false;
         isCheckingPlayer = false;
+        
+        // Disable eye follow when pause ends if player wasn't detected
+        if (eyeFollow != null && !playerDetectedDuringPause)
+        {
+            eyeFollow.enabled = false;
+        }
     }
 
     void OnDrawGizmosSelected()

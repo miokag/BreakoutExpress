@@ -5,7 +5,8 @@ public class NPCSpawner : MonoBehaviour
 {
     public static NPCSpawner Instance;
     
-    public GameObject npcPrefab;
+    [Header("NPC Settings")]
+    public GameObject[] npcPrefabs; // Array of possible NPC prefabs to spawn
     public float minSpawnDelay = 3f;
     public float maxSpawnDelay = 6f;
     public float spawnYPosition = 0f;
@@ -13,11 +14,9 @@ public class NPCSpawner : MonoBehaviour
     
     [Header("Detection Scaling")]
     public int detectionCount = 0;
-    public float baseDetectionWidth = 15f;
     
     [Header("Progressive Scaling")]
     public int[] detectionThresholds = { 3, 6, 9 }; // Tier 0:0-2, Tier 1:3-5, Tier 2:6-8, Tier 3:9+
-    public float[] widthIncreasePerTier = { 0f, 0.5f, 1f, 1.5f };
     public int[] maxPausesPerTier = { 3, 4, 5, 6 }; 
     public int[] pauseChancePerTier = { 30, 45, 60, 75 }; 
 
@@ -35,7 +34,7 @@ public class NPCSpawner : MonoBehaviour
     {
         mainCamera = Camera.main;
         cameraHalfWidth = mainCamera.orthographicSize * mainCamera.aspect;
-        isSpawning = false; // Reset spawning state when enabled
+        isSpawning = false;
         spawnCoroutine = StartCoroutine(SpawnRoutine());
     }
     
@@ -56,7 +55,6 @@ public class NPCSpawner : MonoBehaviour
         }
     }
 
-
     public IEnumerator SpawnRoutine()
     {
         while (true)
@@ -65,12 +63,12 @@ public class NPCSpawner : MonoBehaviour
             yield return new WaitUntil(() => 
                 GameObject.FindGameObjectsWithTag("NPC").Length == 0 && !isSpawning);
             
-            isSpawning = true; // Mark that we're starting a spawn cycle
+            isSpawning = true;
             
             float spawnDelay = Random.Range(minSpawnDelay, maxSpawnDelay);
             yield return new WaitForSeconds(spawnDelay);
             
-            if (this.isActiveAndEnabled)
+            if (this.isActiveAndEnabled && npcPrefabs.Length > 0)
             {
                 SpawnNPC();
             }
@@ -81,6 +79,9 @@ public class NPCSpawner : MonoBehaviour
 
     void SpawnNPC()
     {
+        // Select a random NPC prefab from the array
+        GameObject npcPrefab = npcPrefabs[Random.Range(0, npcPrefabs.Length)];
+        
         float spawnX = mainCamera.transform.position.x - cameraHalfWidth - despawnMargin;
         Vector3 spawnPos = new Vector3(spawnX, spawnYPosition, 0);
         GameObject npc = Instantiate(npcPrefab, spawnPos, Quaternion.identity);
@@ -91,16 +92,15 @@ public class NPCSpawner : MonoBehaviour
         {
             int currentTier = GetCurrentTier();
             int detectionsSinceLastThreshold = detectionCount - (currentTier > 0 ? detectionThresholds[currentTier-1] : 0);
-            
-            // Calculate width increase
-            float widthIncrease = widthIncreasePerTier[currentTier] * detectionsSinceLastThreshold;
-            float scaledWidth = baseDetectionWidth + widthIncrease;
-            
-            // Apply tier-based behavior
+        
+            // Calculate ADDITIVE width increase (preserves inspector value)
+            float widthIncrease = 1;
+            mover.detectionWidth += widthIncrease;
+        
+            // Apply other tier-based behavior
             mover.maxPauses = maxPausesPerTier[currentTier];
             mover.pauseChance = pauseChancePerTier[currentTier];
-            mover.detectionWidth = scaledWidth;
-            
+        
             mover.Initialize(Vector2.right, mainCamera);
         }
     }
