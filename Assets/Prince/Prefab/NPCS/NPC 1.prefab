@@ -133,7 +133,7 @@ MonoBehaviour:
   speed: 7
   pauseDuration: 1
   detectionWidth: 25.5
-  detectionHeight: 28
+  detectionHeight: 31.2
   detectionOffset: {x: -0.6, y: 0}
   pauseChance: 30
   maxPauses: 3
