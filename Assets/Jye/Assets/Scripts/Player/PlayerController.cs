@@ -84,9 +84,9 @@ namespace BreakoutExpress
             if (isGrounded)
             {
                 // Check for moving platform
-                RaycastHit hit;
-                Vector3 rayStart = transform.position + controller.center - Vector3.up * (controller.height / 2);
-                if (Physics.Raycast(rayStart, Vector3.down, out hit, groundCheckDistance + 0.1f))
+                if (Physics.SphereCast(transform.position + controller.center, 
+                        controller.radius * 0.9f, Vector3.down, 
+                        out RaycastHit hit, controller.height / 2 + groundCheckDistance))
                 {
                     if (hit.transform != currentPlatform)
                     {
@@ -97,15 +97,16 @@ namespace BreakoutExpress
 
                     if (currentPlatform != null)
                     {
-                        // Calculate platform movement velocity
                         platformVelocity = currentPlatform.position - lastPlatformPosition;
-                        
-                        // Apply platform movement to player
+                
+                        // Only apply horizontal platform movement (optional)
+                        platformVelocity.y = 0;
+                
                         if (platformVelocity.magnitude > 0.001f)
                         {
                             controller.Move(platformVelocity);
                         }
-                        
+                
                         lastPlatformPosition = currentPlatform.position;
                     }
                 }
@@ -119,6 +120,7 @@ namespace BreakoutExpress
                 currentPlatform = null;
             }
         }
+        
         #endregion
 
         #region Input Handling
@@ -146,8 +148,12 @@ namespace BreakoutExpress
         {
             if (!wasGrounded && isGrounded)
             {
-                velocity.x = 0f;
-                velocity.z = 0f;
+                // Reduce horizontal velocity more aggressively when landing
+                velocity.x *= 0.5f;
+                velocity.z *= 0.5f;
+        
+                // Optional: Add a small downward force to "stick" the landing
+                velocity.y = -2f;
             }
         }
 
@@ -159,6 +165,11 @@ namespace BreakoutExpress
             UpdateVelocity(moveDirection, currentSpeed);
             ApplyGroundFriction();
             RotateToMovementDirection(moveDirection);
+            
+            if (isGrounded && velocity.magnitude < 0.1f)
+            {
+                velocity = Vector3.zero;
+            }
         }
 
         private Vector3 CalculateMovementDirection()
@@ -263,8 +274,12 @@ namespace BreakoutExpress
         #region Ground Check
         private bool CheckGrounded()
         {
-            Vector3 raycastStart = transform.position + controller.center - Vector3.up * (controller.height / 2);
-            return Physics.Raycast(raycastStart, Vector3.down, out _, groundCheckDistance);
+            Vector3 rayStart = transform.position + controller.center;
+            float rayLength = controller.height / 2 + groundCheckDistance;
+    
+            // Cast a sphere slightly smaller than the character controller's radius
+            return Physics.SphereCast(rayStart, controller.radius * 0.9f, Vector3.down, 
+                out RaycastHit hit, rayLength);
         }
         #endregion
     }
