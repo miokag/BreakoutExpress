@@ -25,31 +25,29 @@ namespace BreakoutExpress2D
         internal Rigidbody2D rb;
         private bool facingRight = true;
         private bool isGrounded;
+        private bool wasGrounded;
+
+        private Animator animator;
 
         void Start()
         {
             rb = GetComponent<Rigidbody2D>();
+            animator = GetComponent<Animator>();
         }
 
         void Update()
         {
+            wasGrounded = isGrounded;
+            HandleGroundCheck();
             HandleMovement();
             HandleJump();
             HandlePhysicsAdjustments();
             FlipCharacter();
+            UpdateAnimations();
         }
 
-        private void HandleMovement()
+        private void HandleGroundCheck()
         {
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            float currentSpeed = moveSpeed * (isGrounded ? 1f : airControlFactor);
-            rb.linearVelocity = new Vector2(horizontal * currentSpeed, rb.linearVelocity.y);
-        }
-
-        private void HandleJump()
-        {
-            // Coyote time - remember grounded state briefly after leaving ground
-            bool wasGrounded = isGrounded;
             isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
             if (isGrounded)
@@ -60,24 +58,47 @@ namespace BreakoutExpress2D
             {
                 groundRememberCounter -= Time.deltaTime;
             }
+        }
 
+        private void HandleMovement()
+        {
+            float horizontal = Input.GetAxisRaw("Horizontal");
+            float currentSpeed = moveSpeed * (isGrounded ? 1f : airControlFactor);
+            rb.linearVelocity = new Vector2(horizontal * currentSpeed, rb.linearVelocity.y);
+            animator.SetFloat("xVelocity", Mathf.Abs(rb.linearVelocity.x));
+        }
+
+        private void HandleJump()
+        {
             // Jump if grounded and pressed jump
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && groundRememberCounter > 0)
             {
-                if (groundRememberCounter > 0)
-                {
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                    groundRememberCounter = 0; // Reset coyote time
-                }
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                groundRememberCounter = 0;
+                animator.SetTrigger("JumpTakeOff");
             }
 
             // Variable jump height
-            if (Input.GetKeyUp(KeyCode.Space))
+            if (Input.GetKeyUp(KeyCode.Space) && rb.linearVelocity.y > 0)
             {
-                if (rb.linearVelocity.y > 0)
-                {
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-                }
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
+            }
+        }
+
+        private void UpdateAnimations()
+        {
+            // Update jumping/falling state
+            if (!isGrounded)
+            {
+                animator.SetBool("isJumping", true);
+                
+                // Optional: You can still use yVelocity if needed in your blend tree
+                animator.SetFloat("yVelocity", rb.linearVelocity.y);
+            }
+            else if (wasGrounded != isGrounded) // Just landed
+            {
+                animator.SetBool("isJumping", false);
+                animator.SetTrigger("Land");
             }
         }
 

@@ -8,106 +8,160 @@ namespace BreakoutExpress
         [SerializeField] private float moveSpeed = 3f;
         [SerializeField] private float moveDistance = 5f;
         [SerializeField] private bool moveHorizontally = true;
+        [SerializeField] private float rotationSpeed = 10f;
+        [SerializeField] private Vector3 movementPivotOffset = Vector3.zero;
+        [SerializeField] private Transform visualModel;
 
         [Header("Effect Settings")]
         [SerializeField] private float slowAmount = 0.3f;
+        [SerializeField] private Vector3 effectSize = new Vector3(5f, 5f, 5f);
+        [SerializeField] private Vector3 effectOffset = Vector3.zero;
 
         [Header("Effects")]
         [SerializeField] private ParticleSystem slowZoneEffect;
 
-        private Collider rangeTrigger;
         private PlayerController affectedPlayer;
-        private Vector3 startPosition;
         private float movementTimer;
+        private bool playerInRange;
+        private Vector3 currentDirection;
+        
+        // Movement tracking
+        private Vector3 movementPathCenter;
+        private Vector3 currentPivotWorldPosition;
+        private Vector3 previousPivotWorldPosition;
+        private Vector3 detectionCenter;
 
         private void Awake()
         {
-            startPosition = transform.position;
-            
-            rangeTrigger = GetComponentInChildren<Collider>();
-            if (rangeTrigger != null)
+            if (visualModel == null) 
             {
-                rangeTrigger.isTrigger = true;
+                visualModel = transform;
+                Debug.LogWarning("No visual model assigned - using root transform");
             }
+
+            // Initialize movement path center at current pivot position
+            movementPathCenter = visualModel.TransformPoint(movementPivotOffset);
         }
 
         private void Update()
         {
+            // Store previous pivot position
+            previousPivotWorldPosition = currentPivotWorldPosition;
+
+            // Calculate movement along path
             movementTimer += Time.deltaTime * moveSpeed;
-            float pingPongValue = Mathf.PingPong(movementTimer, 1f) * 2f - 1f; // Returns -1 to 1
+            float pingPongValue = Mathf.PingPong(movementTimer, 1f) * 2f - 1f;
             
-            Vector3 newPosition = startPosition;
+            // Calculate target pivot position along axis
+            currentPivotWorldPosition = movementPathCenter;
             if (moveHorizontally)
             {
-                newPosition.x += pingPongValue * moveDistance;
+                currentPivotWorldPosition.x += pingPongValue * moveDistance;
             }
             else
             {
-                newPosition.z += pingPongValue * moveDistance;
+                currentPivotWorldPosition.z += pingPongValue * moveDistance;
             }
+
+            // Move the entire object to maintain pivot position
+            transform.position = currentPivotWorldPosition - visualModel.TransformDirection(movementPivotOffset);
+
+            // Calculate movement direction
+            currentDirection = (currentPivotWorldPosition - previousPivotWorldPosition).normalized;
             
-            transform.position = newPosition;
+            // Rotate the visual model to face movement direction
+            if (currentDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(currentDirection);
+                visualModel.rotation = Quaternion.Slerp(visualModel.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+
+            // Update detection center (based on current pivot position)
+            detectionCenter = currentPivotWorldPosition + effectOffset;
+
+            // Check for player in range
+            bool wasInRange = playerInRange;
+            playerInRange = CheckForPlayerInRange();
+
+            // Handle state changes
+            if (playerInRange && !wasInRange)
+            {
+                OnPlayerEnteredRange();
+            }
+            else if (!playerInRange && wasInRange)
+            {
+                OnPlayerExitedRange();
+            }
         }
 
-        private void OnTriggerEnter(Collider other)
+        private bool CheckForPlayerInRange()
         {
-            if (other.transform.root.CompareTag("Player"))
+            // Find all players in scene
+            PlayerController[] players = FindObjectsOfType<PlayerController>();
+            
+            foreach (PlayerController player in players)
             {
-                PlayerController player = other.transform.root.GetComponent<PlayerController>();
-                if (player != null)
+                if (player.CompareTag("Player") && IsInEffectRange(player.transform.position))
                 {
                     affectedPlayer = player;
-                    ApplyZoneEffect(true);
-                    Debug.Log("Player entered slow zone");
+                    return true;
                 }
             }
+            
+            return false;
         }
 
-        private void OnTriggerExit(Collider other)
+        private bool IsInEffectRange(Vector3 position)
         {
-            if (other.transform.root.CompareTag("Player"))
-            {
-                ApplyZoneEffect(false);
-                affectedPlayer = null;
-                Debug.Log("Player exited slow zone");
-            }
+            Vector3 relativePos = position - detectionCenter;
+            return Mathf.Abs(relativePos.x) < effectSize.x * 0.5f &&
+                   Mathf.Abs(relativePos.y) < effectSize.y * 0.5f &&
+                   Mathf.Abs(relativePos.z) < effectSize.z * 0.5f;
         }
 
-        private void ApplyZoneEffect(bool entering)
+        private void OnPlayerEnteredRange()
         {
             if (affectedPlayer == null) return;
 
             PlayerEffects effects = GetPlayerEffects(affectedPlayer);
             if (effects == null) return;
 
-            if (entering)
-            {
-                // Disable running
-                affectedPlayer.CanRun = false;
-        
-                effects.ApplyEffect(new PlayerEffect {
-                    type = PlayerEffect.EffectType.Slow,
-                    duration = float.MaxValue,
-                    magnitude = slowAmount
-                });
+            // Disable running
+            affectedPlayer.CanRun = false;
+    
+            effects.ApplyEffect(new PlayerEffect {
+                type = PlayerEffect.EffectType.Slow,
+                duration = float.MaxValue, // Infinite while in range
+                magnitude = slowAmount
+            });
 
-                if (slowZoneEffect != null) 
-                {
-                    slowZoneEffect.Play();
-                }
-            }
-            else
+            if (slowZoneEffect != null) 
             {
-                // Re-enable running
-                affectedPlayer.CanRun = true;
-        
-                effects.CancelEffect(PlayerEffect.EffectType.Slow);
-        
-                if (slowZoneEffect != null) 
-                {
-                    slowZoneEffect.Stop();
-                }
+                slowZoneEffect.Play();
             }
+
+            Debug.Log("Player entered slow zone");
+        }
+
+        private void OnPlayerExitedRange()
+        {
+            if (affectedPlayer == null) return;
+
+            PlayerEffects effects = GetPlayerEffects(affectedPlayer);
+            if (effects == null) return;
+
+            // Re-enable running
+            affectedPlayer.CanRun = true;
+    
+            effects.CancelEffect(PlayerEffect.EffectType.Slow);
+    
+            if (slowZoneEffect != null) 
+            {
+                slowZoneEffect.Stop();
+            }
+
+            Debug.Log("Player exited slow zone");
+            affectedPlayer = null;
         }
 
         private PlayerEffects GetPlayerEffects(PlayerController player)
@@ -120,5 +174,43 @@ namespace BreakoutExpress
             }
             return effects;
         }
+
+        void OnDrawGizmosSelected()
+        {
+            // Calculate current pivot point
+            Vector3 currentPivot = visualModel != null ? 
+                visualModel.TransformPoint(movementPivotOffset) : 
+                transform.position + movementPivotOffset;
+
+            // Draw movement range
+            Gizmos.color = new Color(1f, 0f, 1f, 0.5f);
+            Gizmos.DrawWireCube(currentPivot + effectOffset, effectSize);
+            
+            // Draw movement direction
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(currentPivot, currentDirection * 2f);
+            
+            // Draw pivot point and connection
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(currentPivot, 0.2f);
+            Gizmos.DrawLine(transform.position, currentPivot);
+            
+            // Draw movement path
+            Gizmos.color = Color.cyan;
+            Vector3 pathStart = movementPathCenter;
+            Vector3 pathEnd = movementPathCenter;
+            if (moveHorizontally)
+            {
+                pathStart.x -= moveDistance;
+                pathEnd.x += moveDistance;
+            }
+            else
+            {
+                pathStart.z -= moveDistance;
+                pathEnd.z += moveDistance;
+            }
+            Gizmos.DrawLine(pathStart, pathEnd);
+        }
+
     }
 }
