@@ -21,6 +21,16 @@ namespace BreakoutExpress2D
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private float groundRememberTime = 0.1f; 
         private float groundRememberCounter;
+        
+        [Header("Visual Effects")]
+        [SerializeField] private float idleFadeOpacity = 0.7f;
+        [SerializeField] private float fadeTransitionSpeed = 5f;
+        
+        private SpriteRenderer spriteRenderer;
+        private Color defaultColor;
+        private Color fadedColor;
+        private bool isMoving;
+        private bool isJumping;
 
         internal Rigidbody2D rb;
         private bool facingRight = true;
@@ -33,6 +43,14 @@ namespace BreakoutExpress2D
         {
             rb = GetComponent<Rigidbody2D>();
             animator = GetComponent<Animator>();
+            
+            // Get the SpriteRenderer and store default color
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                defaultColor = spriteRenderer.color;
+                fadedColor = new Color(defaultColor.r, defaultColor.g, defaultColor.b, idleFadeOpacity);
+            }
         }
 
         void Update()
@@ -44,6 +62,7 @@ namespace BreakoutExpress2D
             HandlePhysicsAdjustments();
             FlipCharacter();
             UpdateAnimations();
+            HandleOpacity();
         }
 
         private void HandleGroundCheck()
@@ -65,6 +84,9 @@ namespace BreakoutExpress2D
             float horizontal = Input.GetAxisRaw("Horizontal");
             float currentSpeed = moveSpeed * (isGrounded ? 1f : airControlFactor);
             rb.linearVelocity = new Vector2(horizontal * currentSpeed, rb.linearVelocity.y);
+            
+            // Update movement state
+            isMoving = Mathf.Abs(horizontal) > 0.1f || !isGrounded;
             animator.SetFloat("xVelocity", Mathf.Abs(rb.linearVelocity.x));
         }
 
@@ -89,13 +111,13 @@ namespace BreakoutExpress2D
             // Update jumping/falling state
             if (!isGrounded)
             {
+                isJumping = true;
                 animator.SetBool("isJumping", true);
-                
-                // Optional: You can still use yVelocity if needed in your blend tree
                 animator.SetFloat("yVelocity", rb.linearVelocity.y);
             }
             else if (wasGrounded != isGrounded) // Just landed
             {
+                isJumping = false;
                 animator.SetBool("isJumping", false);
             }
         }
@@ -133,6 +155,20 @@ namespace BreakoutExpress2D
             Vector3 scaler = transform.localScale;
             scaler.x *= -1;
             transform.localScale = scaler;
+        }
+        
+        private void HandleOpacity()
+        {
+            if (spriteRenderer == null) return;
+
+            // Determine target opacity based on player activity
+            float targetAlpha = (isMoving || isJumping) ? defaultColor.a : idleFadeOpacity;
+            
+            // Smoothly transition between opacities
+            Color currentColor = spriteRenderer.color;
+            Color targetColor = new Color(currentColor.r, currentColor.g, currentColor.b, targetAlpha);
+            
+            spriteRenderer.color = Color.Lerp(currentColor, targetColor, fadeTransitionSpeed * Time.deltaTime);
         }
 
         public void IncreaseSpeed(float boost, float duration)

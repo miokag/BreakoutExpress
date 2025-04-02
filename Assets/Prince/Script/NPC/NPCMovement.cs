@@ -38,7 +38,7 @@ public class NPCMovement : MonoBehaviour
     private float cameraHalfWidth;
     private Vector2 playerPositionAtPause;
     
-    private EyeFollow eyeFollow;
+    private EyeFollow[] eyeFollows;
     private bool playerDetectedDuringPause = false;
 
 
@@ -49,11 +49,9 @@ public class NPCMovement : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerController = player.GetComponent<PlayerController2D>();
         
-        eyeFollow = GetComponentInChildren<EyeFollow>(true);
-        if (eyeFollow != null)
-        {
-            eyeFollow.enabled = false;
-        }
+        // Get all EyeFollow components in children and disable them initially
+        eyeFollows = GetComponentsInChildren<EyeFollow>(true);
+        SetEyeFollowsEnabled(false);
     }
 
 
@@ -129,11 +127,8 @@ public class NPCMovement : MonoBehaviour
             Debug.Log($"NPC noticed player moving after stopping!");
             NPCSpawner.Instance.IncreaseDetection();
             
-            // Enable eye follow when player is detected
-            if (eyeFollow != null)
-            {
-                eyeFollow.enabled = true;
-            }
+            // Enable all eye follows when player is detected
+            SetEyeFollowsEnabled(true);
         }
     }
 
@@ -157,10 +152,24 @@ public class NPCMovement : MonoBehaviour
         isPaused = false;
         isCheckingPlayer = false;
         
-        // Disable eye follow when pause ends if player wasn't detected
-        if (eyeFollow != null && !playerDetectedDuringPause)
+        // Disable all eye follows when pause ends if player wasn't detected
+        if (!playerDetectedDuringPause)
         {
-            eyeFollow.enabled = false;
+            SetEyeFollowsEnabled(false);
+        }
+    }
+    
+    private void SetEyeFollowsEnabled(bool enabled)
+    {
+        if (eyeFollows != null)
+        {
+            foreach (var eyeFollow in eyeFollows)
+            {
+                if (eyeFollow != null)
+                {
+                    eyeFollow.enabled = enabled;
+                }
+            }
         }
     }
 
