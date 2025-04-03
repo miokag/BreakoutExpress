@@ -1118,7 +1118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fadeCanvasPrefab: {fileID: 40178537269533891, guid: b42bdd206223ffb4eb4724cfe22a7610, type: 3}
-  fadeSpeed: 1.5
+  fadeSpeed: 2
 --- !u!1 &908398061
 GameObject:
   m_ObjectHideFlags: 0
