@@ -1,2 +1,18 @@
 fileFormatVersion: 2
 guid: 86889f53692774a48a3aad133cd30d88
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - interactPrompt: {instanceID: 0}
+  - puzzleUI: {instanceID: 0}
+  - questionText: {instanceID: 0}
+  - answerInput: {instanceID: 0}
+  - questionData: {instanceID: 0}
+  - correctAnswerSFX: {fileID: 8300000, guid: ce819fcc90ecfa74580e28fbc0cf4e8f, type: 3}
+  - wrongAnswerSFX: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

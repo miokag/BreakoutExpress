@@ -45,7 +45,7 @@ namespace BreakoutExpress
 
         private PlayerInput input;
 
-        private void Awake()
+        private void Start()
         {
             controller = GetComponent<CharacterController>();
             originalHeight = controller.height;

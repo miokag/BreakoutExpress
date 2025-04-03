@@ -3,6 +3,7 @@ using TMPro;
 using System.Collections;
 using BreakoutExpress;
 using BreakoutExpress2D;
+using UnityEngine.SceneManagement;
 
 public class DoorPuzzle : MonoBehaviour
 {
@@ -15,25 +16,31 @@ public class DoorPuzzle : MonoBehaviour
     [Header("Config")]
     public DoorQuestion questionData;
     public float doorOpenDelay = 1f;
+    [Tooltip("Name of the scene to load when puzzle is solved")]
+    public string nextSceneName;
+    
+    [Header("Audio")]
+    public AudioClip correctAnswerSFX;
+    public AudioClip wrongAnswerSFX;
+    public Color normalTextColor = Color.white;
+    public Color wrongAnswerColor = Color.red;
 
     private bool puzzleActive;
     private bool playerInRange;
     private bool puzzleCompleted;
     private MonoBehaviour playerController;
     private bool wasControllerEnabled;
-    private GameObject freeLookCamera; // For 3D mode camera
-    private bool wasCameraActive; // Store camera's original state
-    private GameObject npcManager; // For 2D mode NPC management
-    private bool wasNPCManagerActive; // Store NPC Manager's original state
+    private GameObject freeLookCamera;
+    private bool wasCameraActive;
+    private GameObject npcManager;
+    private bool wasNPCManagerActive;
+    private bool isProcessingAnswer; // New flag to track answer processing
 
     void Start()
     {
         tag = "Interactable";
         HideAllUI();
-        
-        // Find the FreeLook camera if it exists
         freeLookCamera = GameObject.Find("FreeLook Camera");
-        // Find the NPC Manager if it exists
         npcManager = GameObject.Find("NPC Manager");
     }
 
@@ -45,16 +52,15 @@ public class DoorPuzzle : MonoBehaviour
 
     public void ShowInteractPrompt(bool show)
     {
-        if (puzzleCompleted) return;
+        if (puzzleCompleted || isProcessingAnswer) return;
         playerInRange = show;
         if (interactPrompt) interactPrompt.SetActive(show);
     }
 
     public void StartPuzzle()
     {
-        if (puzzleActive || !playerInRange || puzzleCompleted) return;
+        if (puzzleActive || !playerInRange || puzzleCompleted || isProcessingAnswer) return;
         
-        // Handle player controller
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -79,7 +85,6 @@ public class DoorPuzzle : MonoBehaviour
             }
         }
         
-        // Handle 3D camera if it exists
         if (freeLookCamera != null)
         {
             wasCameraActive = freeLookCamera.activeSelf;
@@ -100,18 +105,70 @@ public class DoorPuzzle : MonoBehaviour
 
     public void CheckAnswer()
     {
-        if (puzzleCompleted) return;
+        if (puzzleCompleted || isProcessingAnswer) return;
+        
+        isProcessingAnswer = true;
+        answerInput.interactable = false;
         
         if (int.TryParse(answerInput.text, out int answer) && answer == questionData.correctAnswer)
         {
-            StartCoroutine(OpenDoor());
+            // Correct answer flow
+            if (correctAnswerSFX != null && AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(correctAnswerSFX);
+                StartCoroutine(WaitForSFXThenOpenDoor(correctAnswerSFX.length));
+            }
+            else
+            {
+                StartCoroutine(OpenDoor());
+            }
         }
         else
         {
-            Debug.Log("Try Again");
-            answerInput.text = "";
-            answerInput.Select();
+            // Wrong answer flow
+            if (questionText != null)
+            {
+                answerInput.text = "<color=#" + ColorUtility.ToHtmlStringRGBA(wrongAnswerColor) + ">Try Again</color>";
+            }
+            
+            if (wrongAnswerSFX != null && AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(wrongAnswerSFX);
+                StartCoroutine(WaitForSFXThenReset(wrongAnswerSFX.length));
+            }
+            else
+            {
+                StartCoroutine(ResetAfterDelay(0.5f));
+            }
         }
+    }
+
+    private IEnumerator WaitForSFXThenOpenDoor(float sfxLength)
+    {
+        yield return new WaitForSeconds(sfxLength);
+        StartCoroutine(OpenDoor());
+    }
+
+    private IEnumerator WaitForSFXThenReset(float sfxLength)
+    {
+        yield return new WaitForSeconds(sfxLength);
+        StartCoroutine(ResetAfterDelay(0.1f)); // Small additional delay
+    }
+
+    private IEnumerator ResetAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        answerInput.text = "";
+        answerInput.interactable = true;
+        answerInput.Select();
+        
+        if (questionText != null)
+        {
+            questionText.text = questionData.question;
+        }
+        
+        isProcessingAnswer = false;
     }
 
     IEnumerator OpenDoor()
@@ -119,7 +176,6 @@ public class DoorPuzzle : MonoBehaviour
         yield return new WaitForSeconds(doorOpenDelay);
     
         puzzleCompleted = true;
-        Debug.Log("Correct Answer!");
         if (puzzleUI) puzzleUI.SetActive(false);
     
         if (playerController != null && wasControllerEnabled)
@@ -134,12 +190,19 @@ public class DoorPuzzle : MonoBehaviour
     
         if (npcManager != null && wasNPCManagerActive)
         {
-            // Don't manually start the coroutine - just enable the GameObject
             npcManager.SetActive(true);
         }
     
-        // Disable interaction
         tag = "Untagged";
         if (interactPrompt) interactPrompt.SetActive(false);
+
+        if (!string.IsNullOrEmpty(nextSceneName))
+        {
+            SceneManager.LoadScene(nextSceneName);
+        }
+        else
+        {
+            Debug.LogWarning("No next scene name specified in DoorPuzzle");
+        }
     }
 }

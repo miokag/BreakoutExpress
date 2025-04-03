@@ -387,6 +387,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6672076590935001311}
     m_Modifications:
+    - target: {fileID: 1356595033551681156, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 111.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2476638450472120676, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
+      propertyPath: m_CharacterLimit
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 3591835833810943760, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -491,6 +499,10 @@ PrefabInstance:
       propertyPath: m_fontColor32.rgba
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: 6986484346307105717, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7083502211308491431, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: CheckAnswer
@@ -498,6 +510,14 @@ PrefabInstance:
     - target: {fileID: 7083502211308491431, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: DoorPuzzle, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7389272850427185468, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 7389272850427185468, guid: 2ec33a800221e1c4a813c0361a060d59, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

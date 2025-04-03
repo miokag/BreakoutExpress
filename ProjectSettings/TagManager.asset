@@ -7,6 +7,8 @@ TagManager:
   - Interactable
   - Ground
   - NPC
+  - Audio
+  - PostProcessing
   layers:
   - Default
   - TransparentFX

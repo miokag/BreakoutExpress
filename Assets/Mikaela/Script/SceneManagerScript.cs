@@ -6,7 +6,7 @@ public class SceneManagerScript : MonoBehaviour
 {
     public void PlayGame()
     {
-        SceneManager.LoadScene("Tutorial3DScene");
+        SceneManager.LoadScene("Tutorial3DCart");
     }
 
     public void Settings()
