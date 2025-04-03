@@ -7,25 +7,23 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Music Clips")]
+    [Header("Music Settings")]
     [SerializeField] private AudioClip mainMenuMusic;
     [SerializeField] private AudioClip music2DLevel;
     [SerializeField] private AudioClip music3DLevel;
     [SerializeField] private float musicVolume = 0.7f;
     [SerializeField] private float musicFadeDuration = 1.5f;
+    [SerializeField] private AudioMixerGroup musicMixerGroup;
 
-    [Header("Ambience Clips")]
+    [Header("Ambience Settings")]
     [SerializeField] private AudioClip trainAmbience;
     [SerializeField] private float ambienceVolume = 0.5f;
     [SerializeField] private float ambienceFadeDuration = 1f;
-
-    [Header("Sound Effects")]
-    [SerializeField] private float sfxVolume = 0.8f;
-
-    [Header("Mixer Groups")]
-    [SerializeField] private AudioMixerGroup musicMixerGroup;
-    [SerializeField] private AudioMixerGroup sfxMixerGroup;
     [SerializeField] private AudioMixerGroup ambienceMixerGroup;
+
+    [Header("SFX Settings")]
+    [SerializeField] private float sfxVolume = 0.8f;
+    [SerializeField] private AudioMixerGroup sfxMixerGroup;
 
     private AudioSource musicSource;
     private AudioSource sfxSource;
@@ -33,66 +31,60 @@ public class AudioManager : MonoBehaviour
     private string currentSceneName;
     private bool isCartScene;
 
+    #region Initialization
     private void Awake()
     {
-        // Singleton pattern
+        InitializeSingleton();
+        CreateAudioSources();
+        SceneManager.activeSceneChanged += OnSceneChanged;
+    }
+
+    private void InitializeSingleton()
+    {
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        // Create audio sources
-        musicSource = gameObject.AddComponent<AudioSource>();
-        sfxSource = gameObject.AddComponent<AudioSource>();
-        ambienceSource = gameObject.AddComponent<AudioSource>();
-
-        // Configure music source
-        musicSource.loop = true;
-        musicSource.volume = musicVolume;
-        musicSource.outputAudioMixerGroup = musicMixerGroup;
-
-        // Configure SFX source
-        sfxSource.loop = false;
-        sfxSource.volume = sfxVolume;
-        sfxSource.outputAudioMixerGroup = sfxMixerGroup;
-
-        // Configure ambience source
-        ambienceSource.loop = true;
-        ambienceSource.volume = 0f; // Start silent
-        ambienceSource.outputAudioMixerGroup = ambienceMixerGroup;
-
-        // Subscribe to scene changes
-        SceneManager.activeSceneChanged += OnSceneChanged;
     }
 
-    private void OnDestroy()
+    private void CreateAudioSources()
     {
-        // Unsubscribe to prevent memory leaks
-        SceneManager.activeSceneChanged -= OnSceneChanged;
+        musicSource = CreateAudioSource("Music Source", musicMixerGroup, true, musicVolume);
+        sfxSource = CreateAudioSource("SFX Source", sfxMixerGroup, false, sfxVolume);
+        ambienceSource = CreateAudioSource("Ambience Source", ambienceMixerGroup, true, 0f);
     }
 
-    private void Start()
+    private AudioSource CreateAudioSource(string name, AudioMixerGroup mixerGroup, bool loop, float volume)
     {
-        currentSceneName = SceneManager.GetActiveScene().name;
-        PlaySceneMusic(currentSceneName);
-        CheckForCartScene(currentSceneName);
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.name = name;
+        source.outputAudioMixerGroup = mixerGroup;
+        source.loop = loop;
+        source.volume = volume;
+        return source;
     }
+    #endregion
 
-    private void OnSceneChanged(Scene current, Scene next)
+    #region Scene Management
+    private void Start() => HandleSceneChange(SceneManager.GetActiveScene().name);
+
+    private void OnDestroy() => SceneManager.activeSceneChanged -= OnSceneChanged;
+
+    private void OnSceneChanged(Scene current, Scene next) => HandleSceneChange(next.name);
+
+    private void HandleSceneChange(string sceneName)
     {
-        currentSceneName = next.name;
-        PlaySceneMusic(currentSceneName);
-        CheckForCartScene(currentSceneName);
+        currentSceneName = sceneName;
+        PlaySceneMusic(sceneName);
+        CheckForCartScene(sceneName);
     }
 
     private void CheckForCartScene(string sceneName)
     {
         bool newCartState = sceneName.Contains("Cart");
-        
         if (newCartState != isCartScene)
         {
             isCartScene = newCartState;
@@ -102,97 +94,27 @@ public class AudioManager : MonoBehaviour
 
     private void HandleCartSceneChange()
     {
-        if (isCartScene)
-        {
-            PlayTrainAmbience();
-        }
-        else
-        {
-            StopTrainAmbience();
-        }
+        if (isCartScene) PlayTrainAmbience();
+        else StopTrainAmbience();
     }
+    #endregion
 
-    private void PlayTrainAmbience()
-    {
-        if (trainAmbience == null)
-        {
-            Debug.LogWarning("Train ambience clip not assigned!");
-            return;
-        }
-
-        if (ambienceSource.clip == trainAmbience && ambienceSource.isPlaying)
-            return;
-
-        StartCoroutine(FadeAmbience(trainAmbience, ambienceVolume));
-    }
-    
-    public void PlaySFX(AudioClip clip)
-    {
-        if (clip == null || sfxSource == null) return;
-    
-        sfxSource.PlayOneShot(clip, sfxVolume);
-    }
-
-    private void StopTrainAmbience()
-    {
-        StartCoroutine(FadeAmbience(null, 0f));
-    }
-
-    private IEnumerator FadeAmbience(AudioClip newClip, float targetVolume)
-    {
-        // Fade out current ambience if playing
-        if (ambienceSource.isPlaying)
-        {
-            float startVolume = ambienceSource.volume;
-            float timer = 0f;
-
-            while (timer < ambienceFadeDuration)
-            {
-                timer += Time.deltaTime;
-                ambienceSource.volume = Mathf.Lerp(startVolume, 0f, timer / ambienceFadeDuration);
-                yield return null;
-            }
-
-            ambienceSource.Stop();
-        }
-
-        // Play new ambience if provided
-        if (newClip != null)
-        {
-            ambienceSource.clip = newClip;
-            ambienceSource.Play();
-
-            float timer2 = 0f;
-            while (timer2 < ambienceFadeDuration)
-            {
-                timer2 += Time.deltaTime;
-                ambienceSource.volume = Mathf.Lerp(0f, targetVolume, timer2 / ambienceFadeDuration);
-                yield return null;
-            }
-        }
-    }
-
+    #region Music Control
     private void PlaySceneMusic(string sceneName)
     {
-        AudioClip clipToPlay = null;
-
-        if (sceneName.Contains("Menu"))
-        {
-            clipToPlay = mainMenuMusic;
-        }
-        else if (sceneName.Contains("2D"))
-        {
-            clipToPlay = music2DLevel;
-        }
-        else if (sceneName.Contains("3D"))
-        {
-            clipToPlay = music3DLevel;
-        }
-
+        AudioClip clipToPlay = GetMusicClipForScene(sceneName);
         if (clipToPlay != null && clipToPlay != musicSource.clip)
         {
-            StartCoroutine(FadeMusic(clipToPlay));
+            StartCoroutine(CrossFadeMusic(clipToPlay));
         }
+    }
+
+    private AudioClip GetMusicClipForScene(string sceneName)
+    {
+        if (sceneName.Contains("Menu")) return mainMenuMusic;
+        if (sceneName.Contains("2D")) return music2DLevel;
+        if (sceneName.Contains("3D")) return music3DLevel;
+        return null;
     }
 
     public void PlayMainMenuMusic()
@@ -202,48 +124,66 @@ public class AudioManager : MonoBehaviour
             Debug.LogWarning("Main menu music clip not assigned!");
             return;
         }
-
-        if (musicSource.clip == mainMenuMusic && musicSource.isPlaying)
-            return;
-
-        StartCoroutine(FadeMusic(mainMenuMusic));
+        if (!(musicSource.clip == mainMenuMusic && musicSource.isPlaying))
+        {
+            StartCoroutine(CrossFadeMusic(mainMenuMusic));
+        }
     }
 
-    private IEnumerator FadeMusic(AudioClip newClip)
+    private IEnumerator CrossFadeMusic(AudioClip newClip)
     {
-        // Fade out current music if playing
-        if (musicSource.isPlaying)
-        {
-            float startVolume = musicSource.volume;
-            float timer = 0f;
-
-            while (timer < musicFadeDuration)
-            {
-                timer += Time.deltaTime;
-                musicSource.volume = Mathf.Lerp(startVolume, 0f, timer / musicFadeDuration);
-                yield return null;
-            }
-
-            musicSource.Stop();
-            musicSource.volume = startVolume;
-        }
-
-        // Play new music with fade in
+        yield return FadeAudioSource(musicSource, 0f, musicFadeDuration);
+        
+        musicSource.Stop();
         musicSource.clip = newClip;
         musicSource.Play();
+        
+        yield return FadeAudioSource(musicSource, musicVolume, musicFadeDuration);
+    }
+    #endregion
 
-        float targetVolume = musicSource.volume;
-        musicSource.volume = 0f;
-        float timer2 = 0f;
-
-        while (timer2 < musicFadeDuration)
+    #region Ambience Control
+    private void PlayTrainAmbience()
+    {
+        if (trainAmbience == null)
         {
-            timer2 += Time.deltaTime;
-            musicSource.volume = Mathf.Lerp(0f, targetVolume, timer2 / musicFadeDuration);
-            yield return null;
+            Debug.LogWarning("Train ambience clip not assigned!");
+            return;
+        }
+        if (!(ambienceSource.clip == trainAmbience && ambienceSource.isPlaying))
+        {
+            StartCoroutine(FadeAmbience(trainAmbience, ambienceVolume));
         }
     }
 
+    private void StopTrainAmbience() => StartCoroutine(FadeAmbience(null, 0f));
+
+    private IEnumerator FadeAmbience(AudioClip newClip, float targetVolume)
+    {
+        yield return FadeAudioSource(ambienceSource, 0f, ambienceFadeDuration);
+        
+        if (newClip != null)
+        {
+            ambienceSource.clip = newClip;
+            ambienceSource.Play();
+            yield return FadeAudioSource(ambienceSource, targetVolume, ambienceFadeDuration);
+        }
+        else
+        {
+            ambienceSource.Stop();
+        }
+    }
+    #endregion
+
+    #region SFX Control
+    public void PlaySFX(AudioClip clip)
+    {
+        if (clip == null || sfxSource == null) return;
+        sfxSource.PlayOneShot(clip, sfxVolume);
+    }
+    #endregion
+
+    #region Volume Control
     public void SetMusicVolume(float volume)
     {
         musicVolume = Mathf.Clamp01(volume);
@@ -262,9 +202,27 @@ public class AudioManager : MonoBehaviour
         sfxSource.volume = sfxVolume;
     }
 
-    public void StopAllMusic()
+    public void StopAllAudio()
     {
         musicSource.Stop();
         ambienceSource.Stop();
     }
+    #endregion
+
+    #region Helper Methods
+    private IEnumerator FadeAudioSource(AudioSource source, float targetVolume, float duration)
+    {
+        float startVolume = source.volume;
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            source.volume = Mathf.Lerp(startVolume, targetVolume, timer / duration);
+            yield return null;
+        }
+        
+        source.volume = targetVolume;
+    }
+    #endregion
 }

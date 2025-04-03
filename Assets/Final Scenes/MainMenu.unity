@@ -1403,7 +1403,7 @@ MonoBehaviour:
   musicVolume: 0.7
   musicFadeDuration: 1.5
   trainAmbience: {fileID: 8300000, guid: 7cd7323c2534b584b8346d037eae058d, type: 3}
-  ambienceVolume: 5
+  ambienceVolume: 7
   ambienceFadeDuration: 1
   sfxVolume: 0.8
   musicMixerGroup: {fileID: 0}
