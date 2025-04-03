@@ -1540,6 +1540,16 @@ MonoBehaviour:
   detectionThresholds: 00000000030000000600000009000000
   maxPausesPerTier: 03000000040000000500000006000000
   pauseChancePerTier: 1e0000002d0000003c0000004b000000
+  maxIntensityPerTier:
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  intensityIncreasePerTier:
+  - 0
+  - 0.1
+  - 0.2
+  - 0.3
 --- !u!4 &888146311
 Transform:
   m_ObjectHideFlags: 0

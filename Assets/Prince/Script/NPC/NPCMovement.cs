@@ -1,6 +1,8 @@
 using System.Collections;
 using BreakoutExpress2D;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class NPCMovement : MonoBehaviour
 {
@@ -23,6 +25,11 @@ public class NPCMovement : MonoBehaviour
     [Header("Gizmo Settings")]
     public Color detectionColor = Color.yellow;
     public bool showGizmos = true;
+    
+    [Header("Vignette Settings")]
+    [SerializeField]
+    internal float maxVignetteIntensity = 0.3f;
+    [SerializeField] private float vignetteChangeSpeed = 2f;
 
     private Vector2 direction;
     private Camera mainCamera;
@@ -40,6 +47,14 @@ public class NPCMovement : MonoBehaviour
     
     private EyeFollow[] eyeFollows;
     private bool playerDetectedDuringPause = false;
+    
+    // Vignette
+    
+    private Volume globalVolume;
+    private Vignette vignette;
+    private float originalVignetteIntensity;
+    private float targetVignetteIntensity;
+    private bool playerInRange;
 
 
     void Start()
@@ -52,6 +67,26 @@ public class NPCMovement : MonoBehaviour
         // Get all EyeFollow components in children and disable them initially
         eyeFollows = GetComponentsInChildren<EyeFollow>(true);
         SetEyeFollowsEnabled(false);
+        
+        FindAndSetupVignette();
+    }
+    
+    private void FindAndSetupVignette()
+    {
+        globalVolume = FindObjectOfType<Volume>();
+        if (globalVolume == null || globalVolume.profile == null) return;
+
+        if (!globalVolume.profile.TryGet(out vignette))
+        {
+            Debug.Log("Adding Vignette override to Volume profile");
+            vignette = globalVolume.profile.Add<Vignette>(true);
+            vignette.active = true;
+        }
+
+        if (vignette != null)
+        {
+            originalVignetteIntensity = vignette.intensity.value;
+        }
     }
 
 
@@ -77,6 +112,22 @@ public class NPCMovement : MonoBehaviour
         }
 
         MoveAndDespawn();
+        
+        // Update vignette effect
+        if (vignette != null)
+        {
+            vignette.intensity.value = Mathf.Lerp(
+                vignette.intensity.value, 
+                targetVignetteIntensity, 
+                vignetteChangeSpeed * Time.deltaTime
+            );
+        }
+        
+        // Reset vignette when NPC moves out of range
+        if (!IsPlayerInDetectionZone() && !playerDetectedDuringPause)
+        {
+            targetVignetteIntensity = originalVignetteIntensity;
+        }
     }
 
     bool ShouldPause()
@@ -93,7 +144,6 @@ public class NPCMovement : MonoBehaviour
         Vector2 playerPos = player.position;
         Vector2 zoneCenter = (Vector2)transform.position + detectionOffset;
         
-        // Adjust zone direction based on NPC facing
         float directionMultiplier = direction.x > 0 ? 1 : -1;
         Vector2 adjustedOffset = new Vector2(detectionOffset.x * directionMultiplier, detectionOffset.y);
         zoneCenter = (Vector2)transform.position + adjustedOffset;
@@ -120,14 +170,15 @@ public class NPCMovement : MonoBehaviour
     {
         bool playerMoved = Vector2.Distance(player.position, playerPositionAtPause) > movementThreshold ||
                            Mathf.Abs(playerController.rb.linearVelocity.x) > movementThreshold;
-
+        
         if (playerMoved)
         {
+            // Only intensify vignette if player is detected moving
+            targetVignetteIntensity = maxVignetteIntensity;
             playerDetectedDuringPause = true;
             Debug.Log($"NPC noticed player moving after stopping!");
             NPCSpawner.Instance.IncreaseDetection();
             
-            // Enable all eye follows when player is detected
             SetEyeFollowsEnabled(true);
         }
     }
@@ -148,11 +199,11 @@ public class NPCMovement : MonoBehaviour
 
         yield return new WaitForSeconds(pauseDuration - detectionStartDelay);
 
+        // Don't reset vignette here - let Update handle it based on range
         speed = originalSpeed;
         isPaused = false;
         isCheckingPlayer = false;
         
-        // Disable all eye follows when pause ends if player wasn't detected
         if (!playerDetectedDuringPause)
         {
             SetEyeFollowsEnabled(false);
@@ -190,3 +241,4 @@ public class NPCMovement : MonoBehaviour
         Gizmos.DrawLine(transform.position, forwardLineEnd);
     }
 }
+

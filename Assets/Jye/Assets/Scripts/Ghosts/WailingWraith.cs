@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace BreakoutExpress
 {
@@ -19,6 +21,10 @@ namespace BreakoutExpress
 
         [Header("Effects")]
         [SerializeField] private ParticleSystem slowZoneEffect;
+        
+        [Header("Vignette Settings")]
+        [SerializeField] private float maxVignetteIntensity = 0.5f;
+        [SerializeField] private float vignetteChangeSpeed = 2f;
 
         private PlayerController affectedPlayer;
         private float movementTimer;
@@ -30,11 +36,39 @@ namespace BreakoutExpress
         private Vector3 currentPivotWorldPosition;
         private Vector3 previousPivotWorldPosition;
         private Vector3 detectionCenter;
+        
+        // Vignette
+        private Volume globalVolume;
+        private Vignette vignette;
+        private float originalVignetteIntensity;
+        private float targetVignetteIntensity;
 
         private void Awake()
         {
             // Initialize movement path center at current pivot position
             movementPathCenter = visualModel.TransformPoint(movementPivotOffset);
+            
+            FindGlobalVolume();
+        }
+        
+        private void FindGlobalVolume()
+        {
+            globalVolume = FindObjectOfType<Volume>();
+            if (globalVolume != null && globalVolume.profile != null)
+            {
+                if (!globalVolume.profile.TryGet(out vignette))
+                {
+                    Debug.LogWarning("No Vignette effect found in Global Volume");
+                }
+                else
+                {
+                    originalVignetteIntensity = vignette.intensity.value;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No Volume component found in scene");
+            }
         }
 
         private void Update()
@@ -86,6 +120,15 @@ namespace BreakoutExpress
             {
                 OnPlayerExitedRange();
             }
+            
+            if (vignette != null)
+            {
+                vignette.intensity.value = Mathf.Lerp(
+                    vignette.intensity.value, 
+                    targetVignetteIntensity, 
+                    vignetteChangeSpeed * Time.deltaTime
+                );
+            }
         }
 
         private bool CheckForPlayerInRange()
@@ -133,6 +176,8 @@ namespace BreakoutExpress
             {
                 slowZoneEffect.Play();
             }
+            
+            targetVignetteIntensity = maxVignetteIntensity;
 
             Debug.Log("Player entered slow zone");
         }
@@ -153,6 +198,8 @@ namespace BreakoutExpress
             {
                 slowZoneEffect.Stop();
             }
+            
+            targetVignetteIntensity = originalVignetteIntensity;
 
             Debug.Log("Player exited slow zone");
             affectedPlayer = null;

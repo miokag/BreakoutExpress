@@ -1,4 +1,5 @@
 using System.Collections;
+using BreakoutExpress;
 using UnityEngine;
 
 public class NPCSpawner : MonoBehaviour
@@ -18,7 +19,14 @@ public class NPCSpawner : MonoBehaviour
     [Header("Progressive Scaling")]
     public int[] detectionThresholds = { 3, 6, 9 }; // Tier 0:0-2, Tier 1:3-5, Tier 2:6-8, Tier 3:9+
     public int[] maxPausesPerTier = { 3, 4, 5, 6 }; 
-    public int[] pauseChancePerTier = { 30, 45, 60, 75 }; 
+    public int[] pauseChancePerTier = { 30, 45, 60, 75 };
+    
+    [Header("Vignette Scaling")]
+    public float[] maxIntensityPerTier = { 0.3f, 0.4f, 0.5f, 0.6f };
+    public float[] intensityIncreasePerTier = { 0f, 0.1f, 0.2f, 0.3f };
+    
+    [Header("Time Penalty Settings")]
+    public float[] timePenaltyPerTier = { 3f, 5f, 7f, 10f }; // Tier 0-3 penalties
 
     private Camera mainCamera;
     private float cameraHalfWidth;
@@ -91,8 +99,11 @@ public class NPCSpawner : MonoBehaviour
         if (mover != null)
         {
             int currentTier = GetCurrentTier();
-            int detectionsSinceLastThreshold = detectionCount - (currentTier > 0 ? detectionThresholds[currentTier-1] : 0);
         
+            // Apply tier-based vignette scaling
+            mover.maxVignetteIntensity = maxIntensityPerTier[currentTier];
+            mover.maxVignetteIntensity += intensityIncreasePerTier[currentTier];
+            
             // Calculate ADDITIVE width increase (preserves inspector value)
             float widthIncrease = 1;
             mover.detectionWidth += widthIncrease;
@@ -120,6 +131,16 @@ public class NPCSpawner : MonoBehaviour
     public void IncreaseDetection()
     {
         detectionCount++;
-        Debug.Log($"Detection increased to {detectionCount} (Tier {GetCurrentTier()})");
+        int currentTier = GetCurrentTier();
+        float penalty = timePenaltyPerTier[currentTier];
+    
+        // Find EscapeTimer in the scene
+        EscapeTimer timer = FindObjectOfType<EscapeTimer>();
+        if (timer != null)
+        {
+            timer.ModifyTime(-penalty);
+        }
+    
+        Debug.Log($"Detection increased to {detectionCount} (Tier {currentTier}). Time penalty: -{penalty} seconds");
     }
 }

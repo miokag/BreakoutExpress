@@ -243,6 +243,8 @@ MonoBehaviour:
   detectionStartDelay: 1
   detectionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   showGizmos: 1
+  maxVignetteIntensity: 2
+  vignetteChangeSpeed: 7
 --- !u!61 &7671080317066260350
 BoxCollider2D:
   m_ObjectHideFlags: 0
