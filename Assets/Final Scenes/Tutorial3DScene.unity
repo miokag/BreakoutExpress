@@ -4567,7 +4567,7 @@ Transform:
   m_GameObject: {fileID: 1266952594}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.6417559, y: 3.7814014, z: 6.8563175}
+  m_LocalPosition: {x: -0.6417559, y: 5.79, z: 6.8563175}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4833,7 +4833,7 @@ MonoBehaviour:
   moveDistance: 3
   moveHorizontally: 1
   rotationSpeed: 10
-  movementPivotOffset: {x: 0, y: 1.12, z: 0}
+  movementPivotOffset: {x: 0, y: -0.31, z: 0}
   visualModel: {fileID: 0}
   slowAmount: 0.3
   effectSize: {x: 4.32, y: 3.92, z: 5}

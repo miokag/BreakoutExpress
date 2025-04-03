@@ -33,12 +33,6 @@ namespace BreakoutExpress
 
         private void Awake()
         {
-            if (visualModel == null) 
-            {
-                visualModel = transform;
-                Debug.LogWarning("No visual model assigned - using root transform");
-            }
-
             // Initialize movement path center at current pivot position
             movementPathCenter = visualModel.TransformPoint(movementPivotOffset);
         }
