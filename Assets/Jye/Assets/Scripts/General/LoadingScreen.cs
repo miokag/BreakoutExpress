@@ -1,74 +1,93 @@
-// LoadingScreen.cs (attach to main object in LoadingScene)
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
 
 public class LoadingScreen : MonoBehaviour
 {
-    [Header("Visuals")]
-    public Image walkingCharacter;
-    public TMP_Text loadingText;
-    public float typingSpeed = 0.1f;
-    public string[] loadingPhrases = { "Loading", "Loading.", "Loading..", "Loading..." };
-
-    [Header("Settings")]
-    public float walkAnimationSpeed = 1f;
-    public float walkDistance = 100f;
-
+    [SerializeField] private TMP_Text loadingText;
+    [SerializeField] private float typingSpeed = 0.1f;
+    
+    private string loadingString = "Loading";
     private AsyncOperation loadingOperation;
-    private Vector2 startPos;
-    private string targetScene;
+    private bool isLoading = true;
+    private bool hasFadedIn = false;
 
     void Start()
     {
-        startPos = walkingCharacter.rectTransform.anchoredPosition;
-        targetScene = PlayerPrefs.GetString("TargetScene");
-        StartCoroutine(AnimateLoading());
-        StartCoroutine(LoadTargetScene());
+        if (loadingText == null)
+        {
+            Debug.LogError("LoadingText reference is missing!");
+            return;
+        }
+
+        StartCoroutine(LoadingSequence());
     }
 
-    IEnumerator AnimateLoading()
+    IEnumerator LoadingSequence()
     {
-        int phraseIndex = 0;
-        float walkTimer = 0f;
-        bool walkingRight = true;
-
-        while (true)
+        // Start typing animation
+        StartCoroutine(TypeLoadingText());
+    
+        // Initial delay to allow scene to stabilize
+        yield return new WaitForEndOfFrame();
+    
+        // Fade in if we haven't already
+        if (!hasFadedIn && FadeManager.Instance != null)
         {
-            // Typing text animation
-            loadingText.text = loadingPhrases[phraseIndex];
-            phraseIndex = (phraseIndex + 1) % loadingPhrases.Length;
+            yield return FadeManager.Instance.FadeIn();
+            hasFadedIn = true;
+        }
 
-            // Walking animation
-            walkTimer += Time.deltaTime * walkAnimationSpeed;
-            float progress = Mathf.PingPong(walkTimer, 1f);
-            float newX = Mathf.Lerp(startPos.x, startPos.x + walkDistance, progress);
-            walkingCharacter.rectTransform.anchoredPosition = new Vector2(newX, startPos.y);
+        // Start loading the target scene in background
+        loadingOperation = SceneManager.LoadSceneAsync(GameManager.Instance.TargetScene);
+        loadingOperation.allowSceneActivation = false;
 
-            yield return new WaitForSeconds(typingSpeed);
+        // Create a minimum loading time buffer (2 seconds total)
+        float minLoadingTime = 2f;
+        float loadingTimer = 0f;
+    
+        while (!loadingOperation.isDone || loadingTimer < minLoadingTime)
+        {
+            loadingTimer += Time.deltaTime;
+        
+            // When 90% loaded and minimum time elapsed
+            if (loadingOperation.progress >= 0.9f && loadingTimer >= minLoadingTime)
+            {
+                // Start fade out (takes 1 second based on fadeSpeed = 1)
+                if (FadeManager.Instance != null)
+                {
+                    yield return FadeManager.Instance.FadeOut();
+                }
+            
+                // Extra buffer after fade completes
+                yield return new WaitForSeconds(0.5f);
+            
+                isLoading = false;
+                loadingOperation.allowSceneActivation = true;
+                break;
+            }
+            yield return null;
+        }
+
+        // Wait one frame to ensure scene is loaded
+        yield return null;
+
+        // Fade in the new scene
+        if (FadeManager.Instance != null)
+        {
+            yield return FadeManager.Instance.FadeIn();
         }
     }
 
-    IEnumerator LoadTargetScene()
+    IEnumerator TypeLoadingText()
     {
-        // Small delay to show loading screen
-        yield return new WaitForSeconds(1f);
-
-        loadingOperation = SceneManager.LoadSceneAsync(targetScene);
-        loadingOperation.allowSceneActivation = false;
-
-        while (!loadingOperation.isDone)
+        int dots = 0;
+        while (isLoading)
         {
-            // Wait until loading is almost complete (90% is typical for scene activation)
-            if (loadingOperation.progress >= 0.9f)
-            {
-                // Short delay before activation to ensure everything is ready
-                yield return new WaitForSeconds(0.5f);
-                loadingOperation.allowSceneActivation = true;
-            }
-            yield return null;
+            loadingText.text = loadingString + new string('.', dots);
+            dots = (dots + 1) % 4;
+            yield return new WaitForSeconds(typingSpeed);
         }
     }
 }

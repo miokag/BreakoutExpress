@@ -198,7 +198,7 @@ public class DoorPuzzle : MonoBehaviour
 
         if (!string.IsNullOrEmpty(nextSceneName))
         {
-            SceneManager.LoadScene(nextSceneName);
+            GameManager.Instance.LoadSceneWithLoading(nextSceneName);
         }
         else
         {
