@@ -1409,6 +1409,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1097660636243086035, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1339982333138265288, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: initialTime
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384658146595761008, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 8488519676879922913, guid: 74d7dcc2ddd356440a29d772aa5aa444, type: 3}
+    - target: {fileID: 1384658146595761008, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Replay
+      objectReference: {fileID: 0}
+    - target: {fileID: 4754503446263689926, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6672076590935001311, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1489,8 +1509,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6817465184742382373, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 8488519676879922913, guid: 74d7dcc2ddd356440a29d772aa5aa444, type: 3}
+    - target: {fileID: 6817465184742382373, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MainMenu
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4754503446263689926, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
@@ -1550,6 +1579,11 @@ MonoBehaviour:
   - 0.1
   - 0.2
   - 0.3
+  timePenaltyPerTier:
+  - 3
+  - 5
+  - 7
+  - 10
 --- !u!4 &888146311
 Transform:
   m_ObjectHideFlags: 0

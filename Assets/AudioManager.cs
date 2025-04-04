@@ -69,11 +69,30 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region Scene Management
-    private void Start() => HandleSceneChange(SceneManager.GetActiveScene().name);
+    private void Start()
+    {
+        // Force play music when first initialized
+        PlaySceneMusic(SceneManager.GetActiveScene().name);
+        CheckForCartScene(SceneManager.GetActiveScene().name);
+    }
 
-    private void OnDestroy() => SceneManager.activeSceneChanged -= OnSceneChanged;
+    private void OnDestroy()
+    {
+        SceneManager.activeSceneChanged -= OnSceneChanged;
+    }
 
-    private void OnSceneChanged(Scene current, Scene next) => HandleSceneChange(next.name);
+    private void OnSceneChanged(Scene current, Scene next)
+    {
+        // Delay the scene change handling slightly to ensure scene is fully loaded
+        StartCoroutine(DelayedSceneChange(next.name));
+    }
+    
+    private IEnumerator DelayedSceneChange(string sceneName)
+    {
+        // Wait for end of frame to ensure scene is loaded
+        yield return new WaitForEndOfFrame();
+        HandleSceneChange(sceneName);
+    }
 
     private void HandleSceneChange(string sceneName)
     {
@@ -103,9 +122,24 @@ public class AudioManager : MonoBehaviour
     private void PlaySceneMusic(string sceneName)
     {
         AudioClip clipToPlay = GetMusicClipForScene(sceneName);
-        if (clipToPlay != null && clipToPlay != musicSource.clip)
+        
+        // Always play music if clip is found, even if same as current
+        if (clipToPlay != null)
         {
-            StartCoroutine(CrossFadeMusic(clipToPlay));
+            // If same clip is already playing, just ensure it's not faded out
+            if (musicSource.clip == clipToPlay && musicSource.isPlaying)
+            {
+                musicSource.volume = musicVolume;
+            }
+            else
+            {
+                StartCoroutine(CrossFadeMusic(clipToPlay));
+            }
+        }
+        else
+        {
+            // No music for this scene - fade out
+            StartCoroutine(FadeAudioSource(musicSource, 0f, musicFadeDuration));
         }
     }
 

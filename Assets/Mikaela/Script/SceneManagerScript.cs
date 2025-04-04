@@ -20,16 +20,12 @@ public class SceneManagerScript : MonoBehaviour
 
     public void MainMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        GameManager.Instance.LoadSceneWithLoading("MainMenu");
     }
 
     public void Replay()
     {
-        SceneManager.LoadScene("__"); // to replay , add the scenename to " " 
-    }
-
-    public void Skip()
-    {
-        SceneManager.LoadScene("__"); // to skip tutorial, add the scenename to " " 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        GameManager.Instance.RestartScene();
     }
 }
