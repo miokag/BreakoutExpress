@@ -7042,8 +7042,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5116982822145101858, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7643909644375905019}
   m_SourcePrefab: {fileID: 100100000, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+--- !u!1 &7643909644375905018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5116982822145101858, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+  m_PrefabInstance: {fileID: 7643909644375905017}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7643909644375905019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7643909644375905018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 699187c5043d5bc4f8e6431b9964705b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseShakeAmount: 0.05
+  shakeFrequency: 1
+  movementMultiplier: 10
+  maxShakeOffset: 0.07
+  speedThreshold: 1
+  movementSmoothing: 3
 --- !u!1 &8158590166191462819 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 642146396930824366, guid: 2564c44260fa4a74b84f045d7e6b6ac4, type: 3}

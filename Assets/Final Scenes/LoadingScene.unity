@@ -168,12 +168,12 @@ MonoBehaviour:
   typingSpeed: 0.5
   tips2D:
   - 'Tip: Use arrow keys to move in 2D space'
-  - 'Tip: Jump at the last moment to reach higher platforms'
+  - 'Tip: Hold space longer for higher jumps'
   - 'Tip: Some platforms may disappear after you step on them'
   tips3D:
   - 'Tip: Use WASD to move and mouse to look around in 3D'
-  - 'Tip: Check your surroundings - puzzles might have 3D solutions'
-  - 'Tip: Some objects can be interacted with from multiple angles'
+  - 'Tip: When there''s a ghost nearby, they''re probably onto something!'
+  - 'Tip: If you hear noises, it''s probably the Ticket Taker. Run.'
 --- !u!1 &188678941
 GameObject:
   m_ObjectHideFlags: 0

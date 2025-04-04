@@ -1230,6 +1230,8 @@ MonoBehaviour:
   normalTextColor: {r: 1, g: 1, b: 1, a: 1}
   wrongAnswerColor: {r: 1, g: 0, b: 0, a: 1}
   ghostsToPause: []
+  ghostsToPause2D: []
+  lastCart: 0
 --- !u!1 &513513828
 GameObject:
   m_ObjectHideFlags: 0
@@ -7023,8 +7025,34 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5116982822145101858, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7643909644375905019}
   m_SourcePrefab: {fileID: 100100000, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+--- !u!1 &7643909644375905018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5116982822145101858, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
+  m_PrefabInstance: {fileID: 7643909644375905017}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7643909644375905019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7643909644375905018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 699187c5043d5bc4f8e6431b9964705b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseShakeAmount: 0.05
+  shakeFrequency: 1
+  movementMultiplier: 10
+  maxShakeOffset: 0.07
+  speedThreshold: 1
+  movementSmoothing: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
