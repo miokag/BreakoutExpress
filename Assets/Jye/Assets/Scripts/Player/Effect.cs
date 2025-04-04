@@ -7,7 +7,8 @@ namespace BreakoutExpress
     {
         public enum EffectType
         {
-            Slow
+            Slow,
+            SpeedBoost
         }
 
         public EffectType type;

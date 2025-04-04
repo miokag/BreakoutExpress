@@ -1219,9 +1219,9 @@ MonoBehaviour:
   puzzleUI: {fileID: 1293054840}
   questionText: {fileID: 1293054841}
   answerInput: {fileID: 1293054842}
-  questionData: {fileID: 11400000, guid: b9173f499f5cfdc4b8039b139eb90df5, type: 2}
+  questionData: {fileID: 11400000, guid: a5bf3ccb01be71b48b0a2e5bd5705d7f, type: 2}
   doorOpenDelay: 1
-  nextSceneName: 
+  nextSceneName: Tutorial3DCart2
   correctAnswerSFX: {fileID: 8300000, guid: 445371ca7f206554fa0fc75331a00bac, type: 3}
   wrongAnswerSFX: {fileID: 8300000, guid: 108a94ae530ef7b419b044220cb67907, type: 3}
   normalTextColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1415,7 +1415,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1339982333138265288, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
       propertyPath: initialTime
-      value: 10
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 1384658146595761008, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

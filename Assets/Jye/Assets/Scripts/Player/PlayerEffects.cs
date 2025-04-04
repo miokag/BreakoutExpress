@@ -23,15 +23,23 @@ namespace BreakoutExpress
                 case PlayerEffect.EffectType.Slow:
                     ApplySlow(effect);
                     break;
+                case PlayerEffect.EffectType.SpeedBoost:
+                    ApplySpeedBoost(effect);
+                    break;
             }
             effectEndTime = Time.time + effect.duration;
         }
 
         private void ApplySlow(PlayerEffect effect)
         {
-            // Reduce movement speeds
             playerController.WalkSpeed = originalWalkSpeed * (1f - effect.magnitude);
             playerController.RunSpeed = originalRunSpeed * (1f - effect.magnitude);
+        }
+
+        private void ApplySpeedBoost(PlayerEffect effect)
+        {
+            playerController.WalkSpeed = originalWalkSpeed + effect.magnitude;
+            playerController.RunSpeed = originalRunSpeed + effect.magnitude;
         }
         
         public void CancelEffect(PlayerEffect.EffectType type)
@@ -39,7 +47,7 @@ namespace BreakoutExpress
             switch (type)
             {
                 case PlayerEffect.EffectType.Slow:
-                    // Immediately reset movement speeds
+                case PlayerEffect.EffectType.SpeedBoost:
                     playerController.WalkSpeed = originalWalkSpeed;
                     playerController.RunSpeed = originalRunSpeed;
                     break;
