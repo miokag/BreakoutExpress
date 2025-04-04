@@ -28,6 +28,7 @@ public class DoorPuzzle : MonoBehaviour
 
     [Header("Ghost Control")]
     public TicketTaker3D[] ghostsToPause;
+    public TicketTaker2D[] ghostsToPause2D;
 
     private bool puzzleActive;
     private bool playerInRange;
@@ -79,6 +80,17 @@ public class DoorPuzzle : MonoBehaviour
                 if (ghost != null) ghost.PauseMovement(true);
             }
         }
+        
+        if (ghostsToPause2D != null)
+        {
+            foreach (var ghost in ghostsToPause2D)
+            {
+                Debug.Log("Pause Movement Activating");
+                Debug.Log(ghost);
+                if (ghost != null) ghost.PauseMovement(true);
+            }
+        }
+        else if (ghostsToPause == null) Debug.Log("Null Ghosts to Pause 2D");
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -194,33 +206,6 @@ public class DoorPuzzle : MonoBehaviour
 
         // Clean up puzzle UI
         if (puzzleUI) puzzleUI.SetActive(false);
-        
-        // Resume player control
-        if (playerController != null && wasControllerEnabled)
-        {
-            playerController.enabled = true;
-        }
-        
-        // Resume camera
-        if (freeLookCamera != null && wasCameraActive)
-        {
-            freeLookCamera.SetActive(true);
-        }
-        
-        // Resume NPCs
-        if (npcManager != null && wasNPCManagerActive)
-        {
-            npcManager.SetActive(true);
-        }
-        
-        // Resume ghosts
-        if (ghostsToPause != null)
-        {
-            foreach (var ghost in ghostsToPause)
-            {
-                if (ghost != null) ghost.PauseMovement(false);
-            }
-        }
     }
 
     private IEnumerator WaitForSFXThenOpenDoor(float sfxLength)
@@ -257,15 +242,6 @@ public class DoorPuzzle : MonoBehaviour
     
         puzzleCompleted = true;
         if (puzzleUI) puzzleUI.SetActive(false);
-    
-        // Resume all ghosts
-        if (ghostsToPause != null)
-        {
-            foreach (var ghost in ghostsToPause)
-            {
-                if (ghost != null) ghost.PauseMovement(false);
-            }
-        }
 
         if (playerController != null && wasControllerEnabled)
         {
