@@ -3,7 +3,6 @@ using TMPro;
 using System.Collections;
 using BreakoutExpress;
 using BreakoutExpress2D;
-using UnityEngine.SceneManagement;
 
 public class DoorPuzzle : MonoBehaviour
 {
@@ -12,18 +11,23 @@ public class DoorPuzzle : MonoBehaviour
     public GameObject puzzleUI;
     public TMP_Text questionText;
     public TMP_InputField answerInput;
+    public TMP_Text triesText; // Added for tries display
 
     [Header("Config")]
     public DoorQuestion questionData;
     public float doorOpenDelay = 1f;
-    [Tooltip("Name of the scene to load when puzzle is solved")]
     public string nextSceneName;
+    public int maxTries = 3; // Added max tries setting
     
     [Header("Audio")]
     public AudioClip correctAnswerSFX;
     public AudioClip wrongAnswerSFX;
+    public AudioClip gameOverSFX; // Added for game over sound
     public Color normalTextColor = Color.white;
     public Color wrongAnswerColor = Color.red;
+
+    [Header("Ghost Control")]
+    public TicketTaker3D[] ghostsToPause;
 
     private bool puzzleActive;
     private bool playerInRange;
@@ -34,7 +38,8 @@ public class DoorPuzzle : MonoBehaviour
     private bool wasCameraActive;
     private GameObject npcManager;
     private bool wasNPCManagerActive;
-    private bool isProcessingAnswer; // New flag to track answer processing
+    private bool isProcessingAnswer;
+    private int remainingTries; // Track remaining attempts
 
     void Start()
     {
@@ -42,6 +47,7 @@ public class DoorPuzzle : MonoBehaviour
         HideAllUI();
         freeLookCamera = GameObject.Find("FreeLook Camera");
         npcManager = GameObject.Find("NPC Manager");
+        remainingTries = maxTries; // Initialize tries
     }
 
     void HideAllUI()
@@ -61,6 +67,19 @@ public class DoorPuzzle : MonoBehaviour
     {
         if (puzzleActive || !playerInRange || puzzleCompleted || isProcessingAnswer) return;
         
+        // Reset tries when starting puzzle
+        remainingTries = maxTries;
+        UpdateTriesDisplay();
+
+        // Pause all ghosts
+        if (ghostsToPause != null)
+        {
+            foreach (var ghost in ghostsToPause)
+            {
+                if (ghost != null) ghost.PauseMovement(true);
+            }
+        }
+
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -103,6 +122,14 @@ public class DoorPuzzle : MonoBehaviour
         }
     }
 
+    private void UpdateTriesDisplay()
+    {
+        if (triesText != null)
+        {
+            triesText.text = $"Tries: {remainingTries}";
+        }
+    }
+
     public void CheckAnswer()
     {
         if (puzzleCompleted || isProcessingAnswer) return;
@@ -112,7 +139,6 @@ public class DoorPuzzle : MonoBehaviour
         
         if (int.TryParse(answerInput.text, out int answer) && answer == questionData.correctAnswer)
         {
-            // Correct answer flow
             if (correctAnswerSFX != null && AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlaySFX(correctAnswerSFX);
@@ -125,20 +151,74 @@ public class DoorPuzzle : MonoBehaviour
         }
         else
         {
-            // Wrong answer flow
-            if (questionText != null)
+            remainingTries--; // Decrement tries on wrong answer
+            UpdateTriesDisplay();
+
+            if (remainingTries <= 0)
             {
-                answerInput.text = "<color=#" + ColorUtility.ToHtmlStringRGBA(wrongAnswerColor) + ">Try Again</color>";
-            }
-            
-            if (wrongAnswerSFX != null && AudioManager.Instance != null)
-            {
-                AudioManager.Instance.PlaySFX(wrongAnswerSFX);
-                StartCoroutine(WaitForSFXThenReset(wrongAnswerSFX.length));
+                // No more tries left - game over
+                StartCoroutine(GameOverSequence());
             }
             else
             {
-                StartCoroutine(ResetAfterDelay(0.5f));
+                // Still have tries remaining
+                if (questionText != null)
+                {
+                    answerInput.text = "<color=#" + ColorUtility.ToHtmlStringRGBA(wrongAnswerColor) + ">Try Again</color>";
+                }
+                
+                if (wrongAnswerSFX != null && AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(wrongAnswerSFX);
+                    StartCoroutine(WaitForSFXThenReset(wrongAnswerSFX.length));
+                }
+                else
+                {
+                    StartCoroutine(ResetAfterDelay(0.5f));
+                }
+            }
+        }
+    }
+
+    private IEnumerator GameOverSequence()
+    {
+        // Play game over sound if available
+        if (gameOverSFX != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(gameOverSFX);
+            yield return new WaitForSeconds(gameOverSFX.length);
+        }
+
+        // Trigger game over
+        GameManager.Instance.GameOver();
+
+        // Clean up puzzle UI
+        if (puzzleUI) puzzleUI.SetActive(false);
+        
+        // Resume player control
+        if (playerController != null && wasControllerEnabled)
+        {
+            playerController.enabled = true;
+        }
+        
+        // Resume camera
+        if (freeLookCamera != null && wasCameraActive)
+        {
+            freeLookCamera.SetActive(true);
+        }
+        
+        // Resume NPCs
+        if (npcManager != null && wasNPCManagerActive)
+        {
+            npcManager.SetActive(true);
+        }
+        
+        // Resume ghosts
+        if (ghostsToPause != null)
+        {
+            foreach (var ghost in ghostsToPause)
+            {
+                if (ghost != null) ghost.PauseMovement(false);
             }
         }
     }
@@ -152,7 +232,7 @@ public class DoorPuzzle : MonoBehaviour
     private IEnumerator WaitForSFXThenReset(float sfxLength)
     {
         yield return new WaitForSeconds(sfxLength);
-        StartCoroutine(ResetAfterDelay(0.1f)); // Small additional delay
+        StartCoroutine(ResetAfterDelay(0.1f));
     }
 
     private IEnumerator ResetAfterDelay(float delay)
@@ -178,6 +258,15 @@ public class DoorPuzzle : MonoBehaviour
         puzzleCompleted = true;
         if (puzzleUI) puzzleUI.SetActive(false);
     
+        // Resume all ghosts
+        if (ghostsToPause != null)
+        {
+            foreach (var ghost in ghostsToPause)
+            {
+                if (ghost != null) ghost.PauseMovement(false);
+            }
+        }
+
         if (playerController != null && wasControllerEnabled)
         {
             playerController.enabled = true;

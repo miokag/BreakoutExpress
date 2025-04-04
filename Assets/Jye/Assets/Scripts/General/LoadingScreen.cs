@@ -2,12 +2,30 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 
 public class LoadingScreen : MonoBehaviour
 {
+    [Header("UI Elements")]
     [SerializeField] private TMP_Text loadingText;
+    [SerializeField] private TMP_Text tipsText;
     [SerializeField] private float typingSpeed = 0.1f;
     
+    [Header("Tips Content")]
+    [SerializeField] private List<string> tips2D = new List<string>
+    {
+        "Use arrow keys to move in 2D space",
+        "Long press your keyboard for higher jumps",
+        "Some platforms may disappear after you step on them"
+    };
+    
+    [SerializeField] private List<string> tips3D = new List<string>
+    {
+        "Use WASD to move and mouse to look around in 3D",
+        "Check your surroundings - puzzles might have 3D solutions",
+        "Some objects can be interacted with from multiple angles"
+    };
+
     private string loadingString = "Loading";
     private AsyncOperation loadingOperation;
     private bool isLoading = true;
@@ -21,7 +39,38 @@ public class LoadingScreen : MonoBehaviour
             return;
         }
 
+        // Display appropriate tip based on target scene
+        DisplaySceneSpecificTip();
+        
         StartCoroutine(LoadingSequence());
+    }
+
+    private void DisplaySceneSpecificTip()
+    {
+        if (tipsText == null) return;
+        
+        string targetScene = GameManager.Instance.TargetScene;
+        List<string> tipsToUse = new List<string>();
+        
+        if (targetScene.Contains("3D"))
+        {
+            tipsToUse = tips3D;
+        }
+        else if (targetScene.Contains("2D"))
+        {
+            tipsToUse = tips2D;
+        }
+
+        if (tipsToUse.Count > 0)
+        {
+            // Select a random tip from the appropriate list
+            int randomIndex = Random.Range(0, tipsToUse.Count);
+            tipsText.text = tipsToUse[randomIndex];
+        }
+        else
+        {
+            tipsText.text = "Tip: Explore carefully and enjoy the game!";
+        }
     }
 
     IEnumerator LoadingSequence()

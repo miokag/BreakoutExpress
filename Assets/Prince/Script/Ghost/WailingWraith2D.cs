@@ -84,7 +84,8 @@ namespace BreakoutExpress2D
         {
             if (playerController != null)
             {
-                playerController.moveSpeed *= slowAmount;
+                playerController.walkSpeed *= slowAmount;
+                playerController.runSpeed *= slowAmount;
                 isSlowingPlayer = true;
             }
         }
@@ -93,7 +94,8 @@ namespace BreakoutExpress2D
         {
             if (playerController != null)
             {
-                playerController.moveSpeed /= slowAmount;
+                playerController.walkSpeed /= slowAmount;
+                playerController.runSpeed *= slowAmount;
                 isSlowingPlayer = false;
             }
         }

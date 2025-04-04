@@ -9,6 +9,7 @@ TagManager:
   - NPC
   - Audio
   - PostProcessing
+  - Walls
   layers:
   - Default
   - TransparentFX

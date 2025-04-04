@@ -3131,13 +3131,17 @@ MonoBehaviour:
   puzzleUI: {fileID: 1303369015}
   questionText: {fileID: 834498631}
   answerInput: {fileID: 459034579}
+  triesText: {fileID: 958359654}
   questionData: {fileID: 11400000, guid: b9173f499f5cfdc4b8039b139eb90df5, type: 2}
   doorOpenDelay: 1
   nextSceneName: Tutorial2DCart
+  maxTries: 3
   correctAnswerSFX: {fileID: 8300000, guid: 445371ca7f206554fa0fc75331a00bac, type: 3}
   wrongAnswerSFX: {fileID: 8300000, guid: 108a94ae530ef7b419b044220cb67907, type: 3}
+  gameOverSFX: {fileID: 0}
   normalTextColor: {r: 1, g: 1, b: 1, a: 1}
   wrongAnswerColor: {r: 1, g: 0, b: 0, a: 1}
+  ghostsToPause: []
 --- !u!23 &913571091
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3617,6 +3621,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+--- !u!114 &958359654 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1295239827803022832, guid: bb4914fdfac07b04d9a75bec50f05b3d, type: 3}
+  m_PrefabInstance: {fileID: 958359653}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &981414200
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6587,13 +6602,17 @@ MonoBehaviour:
   puzzleUI: {fileID: 0}
   questionText: {fileID: 0}
   answerInput: {fileID: 0}
+  triesText: {fileID: 0}
   questionData: {fileID: 11400000, guid: b9173f499f5cfdc4b8039b139eb90df5, type: 2}
   doorOpenDelay: 1
   nextSceneName: 
+  maxTries: 3
   correctAnswerSFX: {fileID: 0}
   wrongAnswerSFX: {fileID: 0}
+  gameOverSFX: {fileID: 0}
   normalTextColor: {r: 1, g: 1, b: 1, a: 1}
   wrongAnswerColor: {r: 1, g: 0, b: 0, a: 1}
+  ghostsToPause: []
 --- !u!1 &1712697296 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: 80fc8463ed645a54f98c36871f92552e, type: 3}
