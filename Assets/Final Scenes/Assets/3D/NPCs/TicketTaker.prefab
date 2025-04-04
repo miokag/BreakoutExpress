@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 8400078716412077805}
   - component: {fileID: 2895294650789050845}
   - component: {fileID: 8086515373231696583}
+  - component: {fileID: 895753394936903291}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -136,7 +137,7 @@ MonoBehaviour:
   rotationSpeed: 10
   heightAboveGround: 0.5
   modelForwardAxis: {x: -5, y: 0, z: 1}
-  activationDelay: 10
+  trainTriggerTag: TrainTrigger
   startInvisible: 1
   modelRenderers:
   - {fileID: 8400078716412077805}
@@ -145,6 +146,16 @@ MonoBehaviour:
   - Walls
   colliders:
   - {fileID: 8086515373231696583}
+  activationSound: {fileID: 8300000, guid: d63434b5ecfc2d6498b80a97c8ab7e2e, type: 3}
+  movementSound: {fileID: 8300000, guid: fd61c777ae3c5644691208279adda09b, type: 3}
+  movementSoundInterval: 0.5
+  movementSoundVolume: 0.7
+  activationSoundVolume: 1
+  soundMixerGroup: {fileID: 0}
+  soundMaxDistance: 15
+  soundSpatialBlend: 1
+  muffledVolume: 0.2
+  soundTransitionSpeed: 2
 --- !u!64 &8086515373231696583
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -167,3 +178,30 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 1cbe680fe6352eb42801938adac5ba97, type: 3}
+--- !u!54 &895753394936903291
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5485896813968935840}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
