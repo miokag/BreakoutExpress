@@ -234,10 +234,12 @@ namespace BreakoutExpress
         {
             if (input.Crouch && !isCrouching)
             {
+                Debug.Log("StartCrouching");
                 StartCrouch();
             }
             else if (!input.Crouch && isCrouching)
             {
+                Debug.Log("EndCrouching");
                 StopCrouch();
             }
         }
