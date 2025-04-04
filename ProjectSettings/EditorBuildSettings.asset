@@ -23,6 +23,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Final Scenes/Tutorial2DCart2.unity
     guid: 2e000ad0f9352da48ae19b5c145617aa
+  - enabled: 1
+    path: Assets/Final Scenes/EndScene.unity
+    guid: 6dcc50e7247781949aca3a1556c83701
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

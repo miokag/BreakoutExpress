@@ -30,6 +30,8 @@ public class DoorPuzzle : MonoBehaviour
     public TicketTaker3D[] ghostsToPause;
     public TicketTaker2D[] ghostsToPause2D;
 
+    public bool lastCart;
+
     private bool puzzleActive;
     private bool playerInRange;
     private bool puzzleCompleted;
@@ -67,6 +69,8 @@ public class DoorPuzzle : MonoBehaviour
     public void StartPuzzle()
     {
         if (puzzleActive || !playerInRange || puzzleCompleted || isProcessingAnswer) return;
+
+        GameManager.Instance.SetCursorLocked(false);
         
         // Reset tries when starting puzzle
         remainingTries = maxTries;
@@ -85,9 +89,12 @@ public class DoorPuzzle : MonoBehaviour
         {
             foreach (var ghost in ghostsToPause2D)
             {
-                Debug.Log("Pause Movement Activating");
-                Debug.Log(ghost);
-                if (ghost != null) ghost.PauseMovement(true);
+
+                if (ghost != null)
+                {
+                    ghost.PauseMovement(true);
+                    ghost.SetVisibility(true);
+                }
             }
         }
         else if (ghostsToPause == null) Debug.Log("Null Ghosts to Pause 2D");
@@ -264,6 +271,10 @@ public class DoorPuzzle : MonoBehaviour
         if (!string.IsNullOrEmpty(nextSceneName))
         {
             GameManager.Instance.LoadSceneWithLoading(nextSceneName);
+        }
+        else if (lastCart == true)
+        {
+            GameManager.Instance.CompleteLastCart();
         }
         else
         {

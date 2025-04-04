@@ -925,7 +925,7 @@ MonoBehaviour:
   triesText: {fileID: 1235059821}
   questionData: {fileID: 11400000, guid: 48966979dc10839418b3f724ddfdeb37, type: 2}
   doorOpenDelay: 1
-  nextSceneName: Tutorial3DCart2
+  nextSceneName: 
   maxTries: 3
   correctAnswerSFX: {fileID: 8300000, guid: 445371ca7f206554fa0fc75331a00bac, type: 3}
   wrongAnswerSFX: {fileID: 8300000, guid: 108a94ae530ef7b419b044220cb67907, type: 3}
@@ -936,6 +936,7 @@ MonoBehaviour:
   - {fileID: 0}
   ghostsToPause2D:
   - {fileID: 8267766765214999554}
+  lastCart: 1
 --- !u!1 &513513828
 GameObject:
   m_ObjectHideFlags: 0
@@ -6996,7 +6997,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7505259496208874713, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 32.6
+      value: -10.73
       objectReference: {fileID: 0}
     - target: {fileID: 7505259496208874713, guid: 8a17e6ff0acb6344f86557fea729a436, type: 3}
       propertyPath: m_LocalPosition.y

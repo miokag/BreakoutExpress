@@ -207,7 +207,7 @@ public class TicketTaker2D : MonoBehaviour
         }
     }
 
-    private void SetVisibility(bool visible)
+    public void SetVisibility(bool visible)
     {
         if (spriteRenderer != null)
         {

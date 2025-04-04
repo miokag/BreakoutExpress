@@ -816,6 +816,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2033346748}
+    - target: {fileID: 1902425777662761179, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -84
+      objectReference: {fileID: 0}
     - target: {fileID: 4262001502640657493, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
       propertyPath: m_Name
       value: StartMenu
@@ -904,6 +908,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2033346748}
+    - target: {fileID: 5287843319709350143, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 3.8000183
+      objectReference: {fileID: 0}
     - target: {fileID: 9058247352655948439, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -977,7 +985,8 @@ PrefabInstance:
       value: UnityEngine.AudioSource, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 102605111232609290, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fdd76d92eb17da04dab545452e5a32e1, type: 3}
