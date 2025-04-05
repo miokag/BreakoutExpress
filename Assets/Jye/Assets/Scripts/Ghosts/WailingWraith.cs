@@ -45,9 +45,6 @@ namespace BreakoutExpress
 
         private void Awake()
         {
-            // Initialize movement path center at current pivot position
-            movementPathCenter = visualModel.TransformPoint(movementPivotOffset);
-            
             FindGlobalVolume();
         }
         

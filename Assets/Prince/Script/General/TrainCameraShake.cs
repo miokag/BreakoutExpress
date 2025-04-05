@@ -73,7 +73,6 @@ public class TrainCameraShake : MonoBehaviour
 
     public void AddBump(float intensity)
     {
-        // Add an immediate bump to the camera
         float bumpX = Random.Range(-intensity, intensity);
         float bumpY = Random.Range(-intensity, intensity);
         transform.localPosition += new Vector3(bumpX, bumpY, 0);

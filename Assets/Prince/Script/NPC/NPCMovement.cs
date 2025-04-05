@@ -199,7 +199,6 @@ public class NPCMovement : MonoBehaviour
 
         yield return new WaitForSeconds(pauseDuration - detectionStartDelay);
 
-        // Don't reset vignette here - let Update handle it based on range
         speed = originalSpeed;
         isPaused = false;
         isCheckingPlayer = false;

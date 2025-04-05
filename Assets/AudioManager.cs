@@ -123,7 +123,6 @@ public class AudioManager : MonoBehaviour
     {
         AudioClip clipToPlay = GetMusicClipForScene(sceneName);
         
-        // Always play music if clip is found, even if same as current
         if (clipToPlay != null)
         {
             // If same clip is already playing, just ensure it's not faded out
@@ -138,7 +137,6 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
-            // No music for this scene - fade out
             StartCoroutine(FadeAudioSource(musicSource, 0f, musicFadeDuration));
         }
     }
